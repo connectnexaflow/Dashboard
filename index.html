@@ -1,1220 +1,2070 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>NexaFlow Dashboard</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366f1'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='700'>N</text></svg>"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg-app:#0b0d14;--bg-card:#111520;--bg-card2:#181d2c;--bg-glass:rgba(255,255,255,0.04);
-  --border:rgba(255,255,255,0.08);--border-hi:rgba(99,102,241,0.5);
-  --text-1:#eef2ff;--text-2:#7c8898;--text-3:#3d4659;
-  --indigo:#6366f1;--indigo-hi:#a5b4fc;--indigo-lo:rgba(99,102,241,0.14);
-  --emerald:#10b981;--amber:#f59e0b;--sky:#0ea5e9;--violet:#8b5cf6;--rose:#f43f5e;
-  --font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
-  --r1:7px;--r2:13px;--trans:0.17s cubic-bezier(.4,0,.2,1);
-  --sidebar-w:215px;
-}
-[data-theme="light"]{
-  --bg-app:#f0f4ff;--bg-card:#ffffff;--bg-card2:#f6f8ff;--bg-glass:rgba(0,0,0,0.025);
-  --border:rgba(0,0,0,0.09);--border-hi:rgba(99,102,241,0.4);
-  --text-1:#0f172a;--text-2:#475569;--text-3:#94a3b8;--indigo-lo:rgba(99,102,241,0.09);
-}
-html,body{height:100%;font-family:var(--font);background:var(--bg-app);color:var(--text-1);}
-.app{display:flex;height:100vh;overflow:hidden;}
-
-/* SIDEBAR */
-.sidebar{
-  width:var(--sidebar-w);flex-shrink:0;background:var(--bg-card);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;
-  transition:width var(--trans);overflow:hidden;
-}
-.sidebar.collapsed{width:58px;}
-.sb-logo{display:flex;align-items:center;gap:11px;padding:19px 15px;border-bottom:1px solid var(--border);min-height:64px;}
-.logo-mark{
-  width:32px;height:32px;border-radius:9px;flex-shrink:0;
-  background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;font-weight:700;color:#fff;letter-spacing:-.5px;
-}
-.logo-text{overflow:hidden;white-space:nowrap;transition:opacity var(--trans);}
-.logo-name{font-size:14.5px;font-weight:600;color:var(--text-1);}
-.logo-sub{font-size:10px;color:var(--text-2);}
-.sidebar.collapsed .logo-text{opacity:0;width:0;pointer-events:none;}
-.sidebar.collapsed .nav-lbl{opacity:0;width:0;pointer-events:none;overflow:hidden;}
-.sidebar.collapsed .user-info{opacity:0;width:0;pointer-events:none;overflow:hidden;}
-.sb-nav{flex:1;overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column;gap:3px;}
-.nav-item{
-  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r1);
-  cursor:pointer;color:var(--text-2);font-size:13.5px;font-weight:500;
-  white-space:nowrap;border:none;background:none;width:100%;text-align:left;
-  font-family:var(--font);transition:background var(--trans),color var(--trans);
-}
-.nav-item:hover{background:var(--bg-glass);color:var(--text-1);}
-.nav-item.active{background:var(--indigo-lo);color:var(--indigo-hi);}
-.nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;line-height:1;}
-.sb-bottom{padding:10px 8px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:3px;}
-.user-chip{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r1);}
-.avatar{
-  display:flex;align-items:center;justify-content:center;border-radius:50%;
-  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
-  font-weight:600;flex-shrink:0;
-}
-.av-sm{width:28px;height:28px;font-size:11px;}
-.av-md{width:38px;height:38px;font-size:14px;}
-.user-name{font-size:13px;font-weight:500;color:var(--text-1);white-space:nowrap;}
-.user-role-lbl{font-size:10.5px;color:var(--text-2);}
-
-/* MAIN */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.topbar{
-  height:64px;border-bottom:1px solid var(--border);background:var(--bg-card);
-  display:flex;align-items:center;gap:12px;padding:0 24px;flex-shrink:0;
-}
-.tb-title{font-size:16px;font-weight:600;}
-.tb-sub{font-size:11px;color:var(--text-2);margin-top:1px;}
-.icon-btn{
-  width:36px;height:36px;border-radius:var(--r1);border:1px solid var(--border);
-  background:var(--bg-card2);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--text-2);font-size:16px;transition:all var(--trans);font-family:var(--font);
-  position:relative;flex-shrink:0;
-}
-.icon-btn:hover{color:var(--text-1);border-color:var(--border-hi);background:var(--indigo-lo);}
-.notif-dot{width:8px;height:8px;border-radius:50%;background:#f43f5e;position:absolute;top:5px;right:5px;border:2px solid var(--bg-card);}
-.content{flex:1;overflow-y:auto;padding:24px;}
-
-/* CARDS */
-.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r2);padding:20px;}
-.card-sm{padding:16px;}
-.card-lbl{font-size:12px;color:var(--text-2);font-weight:500;margin-bottom:5px;}
-.card-val{font-size:26px;font-weight:600;line-height:1.1;}
-.card-sub{font-size:11.5px;color:var(--text-2);margin-top:4px;}
-
-/* GRIDS */
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.grid-main{display:grid;grid-template-columns:1fr 320px;gap:18px;}
-.col-stack{display:flex;flex-direction:column;gap:18px;}
-
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:100px;font-size:12px;font-weight:500;}
-.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:500;}
-
-/* BUTTONS */
-.btn{
-  display:inline-flex;align-items:center;gap:7px;padding:9px 16px;
-  border-radius:var(--r1);font-size:13.5px;font-weight:500;cursor:pointer;
-  transition:all var(--trans);border:none;font-family:var(--font);
-}
-.btn-primary{background:#6366f1;color:#fff;}
-.btn-primary:hover{background:#4f46e5;}
-.btn-outline{background:transparent;color:var(--text-2);border:1px solid var(--border);}
-.btn-outline:hover{color:var(--text-1);border-color:var(--border-hi);background:var(--indigo-lo);}
-.btn-danger{background:rgba(244,63,94,.12);color:#fb7185;border:1px solid rgba(244,63,94,.25);}
-.btn-danger:hover{background:rgba(244,63,94,.2);}
-.btn-success{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);}
-.btn-success:hover{background:rgba(16,185,129,.2);}
-.btn-sm{padding:6px 12px;font-size:12.5px;}
-.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
-.sa-row{display:flex;flex-wrap:wrap;gap:9px;}
-
-/* SECTION */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.sec-title{font-size:13.5px;font-weight:600;}
-
-/* TIMELINE */
-.tl{display:flex;flex-direction:column;}
-.tl-item{display:flex;gap:12px;padding:9px 0;position:relative;}
-.tl-item:not(:last-child)::before{content:'';position:absolute;left:16px;top:34px;width:1px;height:calc(100% - 12px);background:var(--border);}
-.tl-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid;}
-.tl-lbl{font-size:13px;font-weight:500;}
-.tl-time{font-size:11.5px;color:var(--text-2);font-family:var(--mono);margin-top:2px;}
-
-/* BAR CHART */
-.bar-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px;}
-.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;}
-.bar-stack{display:flex;flex-direction:column-reverse;gap:2px;width:100%;flex:1;}
-.bar-seg{width:100%;border-radius:3px 3px 0 0;transition:height .5s cubic-bezier(.4,0,.2,1);}
-.bar-lbl{font-size:9.5px;color:var(--text-2);margin-top:6px;flex-shrink:0;}
-
-/* DONUT */
-.donut-wrap{display:flex;justify-content:center;margin:12px 0;}
-
-/* QUICK LINKS */
-.ql-item{
-  display:flex;align-items:center;gap:11px;padding:11px 13px;
-  border-radius:var(--r1);border:1px solid var(--border);background:var(--bg-card2);
-  cursor:pointer;transition:all var(--trans);text-decoration:none;color:var(--text-1);
-  margin-bottom:8px;
-}
-.ql-item:hover{border-color:var(--border-hi);background:var(--indigo-lo);}
-.ql-icon{width:34px;height:34px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-
-/* PROGRESS */
-.prog{height:5px;border-radius:100px;background:var(--border);overflow:hidden;margin-top:4px;}
-.prog-fill{height:100%;border-radius:100px;transition:width .7s cubic-bezier(.4,0,.2,1);}
-
-/* TABLES */
-.tbl{width:100%;border-collapse:collapse;}
-.tbl th{font-size:11px;color:var(--text-2);font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);}
-.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;}
-.tbl tr:last-child td{border-bottom:none;}
-
-/* FORM */
-.input{
-  background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r1);
-  padding:9px 13px;font-size:13.5px;color:var(--text-1);font-family:var(--font);
-  width:100%;outline:none;transition:border var(--trans);
-}
-.input:focus{border-color:#6366f1;}
-.input::placeholder{color:var(--text-3);}
-.field-lbl{font-size:12px;color:var(--text-2);font-weight:500;margin-bottom:6px;display:block;}
-.field-grp{margin-bottom:15px;}
-
-/* TABS */
-.tabs{display:flex;gap:2px;background:var(--bg-card2);border-radius:var(--r1);padding:3px;margin-bottom:18px;}
-.tab{flex:1;padding:7px;text-align:center;font-size:13px;font-weight:500;border-radius:6px;cursor:pointer;color:var(--text-2);transition:all var(--trans);border:none;background:none;font-family:var(--font);}
-.tab.active{background:var(--bg-card);color:var(--text-1);box-shadow:0 1px 4px rgba(0,0,0,.25);}
-
-/* SEP */
-.sep{height:1px;background:var(--border);margin:16px 0;}
-
-/* PIE LEGEND */
-.pie-row{display:flex;align-items:center;margin-bottom:9px;font-size:12.5px;}
-.pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:8px;}
-.pie-name{color:var(--text-2);flex:1;}
-.pie-val{font-weight:500;font-family:var(--mono);font-size:12px;}
-
-/* AUTH */
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg-app);}
-.auth-card{width:100%;max-width:420px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r2);padding:32px;}
-.auth-title{font-size:22px;font-weight:700;margin-bottom:6px;}
-.auth-sub{font-size:14px;color:var(--text-2);margin-bottom:28px;}
-.err-msg{font-size:12px;color:#fb7185;margin-top:8px;min-height:18px;}
-
-/* ANIMATIONS */
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-.pulse{animation:pulse 2s infinite;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.fade-up{animation:fadeUp .3s ease both;}
-
-/* LEGEND */
-.legend-row{display:flex;gap:14px;font-size:11px;color:var(--text-2);}
-.legend-dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0;}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
-
-/* RESPONSIVE */
-@media(max-width:960px){
-  .grid4{grid-template-columns:repeat(2,1fr);}
-  .grid-main{grid-template-columns:1fr;}
-  .sidebar{width:58px;}
-  .sidebar .logo-text,.sidebar .nav-lbl,.sidebar .user-info{opacity:0;width:0;pointer-events:none;}
-}
-@media(max-width:600px){
-  .content{padding:14px;}
-  .grid4{grid-template-columns:1fr 1fr;}
-  .topbar{padding:0 14px;gap:8px;}
-}
-</style>
-</head>
-<body data-theme="dark">
-<div id="app"></div>
-<script>
-// ═══════════════════════════════════════════════════
-// CONFIG — only real users, no mock data
-// ═══════════════════════════════════════════════════
-const USERS = [
-  {id:1, name:"Abhishek Mishra", email:"connect@nexaflow.bar",  role:"Admin", avatar:"AM", pass:"admin@123"},
-  {id:2, name:"Priya Sharma",    email:"priya@nexaflow.bar",    role:"Staff", avatar:"PS", pass:"priya@123"},
-  {id:3, name:"Rohan Das",       email:"rohan@nexaflow.bar",    role:"Staff", avatar:"RD", pass:"rohan@123"},
-];
-
-const STATUS_CFG = {
-  "checked-in":  {label:"Checked In",   color:"#10b981", bg:"rgba(16,185,129,.14)", icon:"●"},
-  "checked-out": {label:"Checked Out",  color:"#64748b", bg:"rgba(100,116,139,.12)",icon:"○"},
-  "break":       {label:"On Break",     color:"#f59e0b", bg:"rgba(245,158,11,.14)", icon:"◐"},
-  "meeting":     {label:"In Meeting",   color:"#0ea5e9", bg:"rgba(14,165,233,.14)", icon:"◈"},
-  "call":        {label:"On a Call",    color:"#8b5cf6", bg:"rgba(139,92,246,.14)", icon:"◉"},
-  "focus":       {label:"Focus Mode",   color:"#d946ef", bg:"rgba(217,70,239,.14)", icon:"◎"},
-};
-
-const QUICK_LINKS = [
-  {icon:"💬", label:"WhatsApp Web",    sub:"Open messaging",   href:"https://web.whatsapp.com",        bg:"rgba(37,211,102,.12)"},
-  {icon:"🧩", label:"Zoho CRM",        sub:"Customer portal",  href:"https://crm.zoho.com",            bg:"rgba(99,102,241,.12)"},
-  {icon:"📅", label:"Google Calendar", sub:"View schedule",    href:"https://calendar.google.com",     bg:"rgba(234,67,53,.12)"},
-  {icon:"📊", label:"Google Sheets",   sub:"Spreadsheets",     href:"https://sheets.google.com",       bg:"rgba(14,165,233,.12)"},
-  {icon:"🗂️", label:"Notion",          sub:"Docs & tasks",     href:"https://notion.so",               bg:"rgba(255,255,255,.08)"},
-  {icon:"📧", label:"Gmail",           sub:"Check inbox",      href:"https://mail.google.com",         bg:"rgba(234,67,53,.08)"},
-];
-
-// ═══════════════════════════════════════════════════
-// PERSISTENT STATE (localStorage per user)
-// ═══════════════════════════════════════════════════
-const APP = {
-  user:      null,
-  theme:     localStorage.getItem("nf-theme") || "dark",
-  page:      "dashboard",
-  collapsed: window.innerWidth < 960,
-  // per-session (loaded after login)
-  status:    "checked-out",
-  timeline:  [],
-  notif:     0,
-};
-
-function getStorageKey(uid, key){ return `nf_u${uid}_${key}`; }
-
-function saveUserState(){
-  if(!APP.user) return;
-  const uid = APP.user.id;
-  localStorage.setItem(getStorageKey(uid,"status"),   APP.status);
-  localStorage.setItem(getStorageKey(uid,"timeline"), JSON.stringify(APP.timeline));
-}
-
-function loadUserState(user){
-  const uid = user.id;
-  const status   = localStorage.getItem(getStorageKey(uid,"status"))   || "checked-out";
-  const rawTl    = localStorage.getItem(getStorageKey(uid,"timeline"));
-  let timeline   = [];
-  try { timeline = rawTl ? JSON.parse(rawTl) : []; } catch(e){ timeline=[]; }
-  return {status, timeline};
-}
-
-function setState(patch){
-  Object.assign(APP, patch);
-  if(APP.user) saveUserState();
-  render();
-}
-
-// ═══════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════
-function now5(){
-  return new Date().toTimeString().slice(0,5);
-}
-function nowDate(){
-  return new Date().toLocaleDateString("en-IN",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
-}
-function elapsed(startHHMM){
-  if(!startHHMM) return 0;
-  const [h,m] = startHHMM.split(":").map(Number);
-  const now = new Date();
-  const st  = new Date();
-  st.setHours(h, m, 0, 0);
-  return Math.max(0, Math.round((now - st) / 60000));
-}
-function fmt(min){
-  if(min === null || min === undefined || isNaN(min)) return "—";
-  const h = Math.floor(min / 60);
-  const m = Math.round(min % 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-
-// ═══════════════════════════════════════════════════
-// DOM BUILDER — safe, no [object Object]
-// ═══════════════════════════════════════════════════
-function el(tag, attrs, ...kids){
-  const isSvg = ["svg","circle","polyline","path"].includes(tag);
-  const e = isSvg
-    ? document.createElementNS("http://www.w3.org/2000/svg", tag)
-    : document.createElement(tag);
-
-  if(attrs && typeof attrs === "object"){
-    for(const [k, v] of Object.entries(attrs)){
-      if(v === null || v === false || v === undefined) continue;
-      if(k === "class"){
-        e.className = v;
-      } else if(k === "style" && typeof v === "object"){
-        Object.assign(e.style, v);
-      } else if(k === "on" && typeof v === "object"){
-        for(const [ev, fn] of Object.entries(v)){
-          e.addEventListener(ev, fn);
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NexaFlow Dashboard</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366f1'/><text x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-family='sans-serif' font-weight='700'>N</text></svg>" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-      } else {
-        try { e.setAttribute(k, v); } catch(err){}
-      }
-    }
-  }
-
-  function appendKid(k){
-    if(k === null || k === undefined || k === false) return;
-    if(Array.isArray(k)){ k.forEach(appendKid); return; }
-    if(typeof k === "string" || typeof k === "number"){
-      e.appendChild(document.createTextNode(String(k)));
-    } else if(k instanceof Node){
-      e.appendChild(k);
-    }
-    // silently skip anything else (prevents [object Object])
-  }
-  kids.forEach(appendKid);
-  return e;
-}
-
-function div(cls, ...kids){
-  if(cls && typeof cls === "object" && !(cls instanceof Node)){
-    // called as div({style:...}, ...kids)
-    return el("div", cls, ...kids);
-  }
-  return el("div", cls ? {class:cls} : null, ...kids);
-}
-function span(cls, ...kids){ return el("span", cls ? {class:cls} : null, ...kids); }
-
-function mkBtn(cls, label, onClick, disabled){
-  const b = el("button", {class:`btn ${cls}`, ...(disabled?{disabled:true}:{})});
-  b.textContent = label;
-  if(onClick) b.addEventListener("click", onClick);
-  return b;
-}
-
-// ═══════════════════════════════════════════════════
-// UI COMPONENTS
-// ═══════════════════════════════════════════════════
-function Avatar(initials, size){
-  size = size || "sm";
-  return div(`avatar av-${size}`, initials);
-}
-
-function StatusBadge(status){
-  const c = STATUS_CFG[status] || STATUS_CFG["checked-out"];
-  const badge = div("badge");
-  badge.style.background = c.bg;
-  badge.style.color = c.color;
-  const dot = span();
-  dot.textContent = c.icon;
-  if(status !== "checked-out") dot.classList.add("pulse");
-  badge.appendChild(dot);
-  badge.appendChild(document.createTextNode(" " + c.label));
-  return badge;
-}
-
-function StatCard(label, value, sub){
-  const c = div("card card-sm");
-  const lbl = div("card-lbl"); lbl.textContent = label;
-  const val = div("card-val"); val.textContent = String(value);
-  c.appendChild(lbl);
-  c.appendChild(val);
-  if(sub){
-    const s = div("card-sub"); s.textContent = sub;
-    c.appendChild(s);
-  }
-  c.classList.add("fade-up");
-  return c;
-}
-
-// Bar chart — built purely, no chance of [object Object]
-function WeeklyBar(data, maxOverride){
-  const max = maxOverride || Math.max(...data.map(d => d.active + d.breaks + d.meetings + d.call + d.focus), 0.1);
-  const wrap = div("bar-wrap");
-
-  data.forEach(d => {
-    const total = d.active + d.breaks + d.meetings + d.call + d.focus;
-    const col = div("bar-col");
-    const stack = div("bar-stack");
-    stack.style.height = "100px";
-    stack.style.display = "flex";
-    stack.style.flexDirection = "column-reverse";
-    stack.style.gap = "2px";
-
-    function makeSeg(v, color){
-      const s = div("bar-seg");
-      s.style.height = max > 0 ? `${(v / max) * 100}%` : "0%";
-      s.style.background = color;
-      s.style.minHeight = "0";
-      s.style.flexShrink = "0";
-      return s;
-    }
-
-    stack.appendChild(makeSeg(d.active,   "#6366f1"));
-    stack.appendChild(makeSeg(d.breaks,   "#f59e0b"));
-    stack.appendChild(makeSeg(d.meetings, "#0ea5e9"));
-    stack.appendChild(makeSeg(d.call,     "#8b5cf6"));
-    stack.appendChild(makeSeg(d.focus,    "#d946ef"));
-
-    const lbl = div("bar-lbl"); lbl.textContent = d.day;
-
-    col.style.display = "flex";
-    col.style.flexDirection = "column";
-    col.style.alignItems = "center";
-    col.style.flex = "1";
-
-    col.appendChild(stack);
-    col.appendChild(lbl);
-    wrap.appendChild(col);
-  });
-  return wrap;
-}
-
-// Donut — pure SVG, no [object Object]
-function DonutChart(segments){
-  const r = 40, cx = 50, cy = 50, sw = 14;
-  const circ = 2 * Math.PI * r;
-  const total = segments.reduce((a, s) => a + s.v, 0) || 1;
-  const svg = el("svg", {viewBox:"0 0 100 100", width:"100", height:"100"});
-
-  let offset = 0;
-  segments.forEach(s => {
-    const dash = (s.v / total) * circ;
-    const c = el("circle", {
-      cx: cx, cy: cy, r: r,
-      fill: "none",
-      stroke: s.color,
-      "stroke-width": sw,
-      "stroke-dasharray": `${dash} ${circ - dash}`,
-      "stroke-dashoffset": `${circ * 0.25 - offset}`,
-      "stroke-linecap": "round",
-    });
-    svg.appendChild(c);
-    offset += dash;
-  });
-
-  // centre text
-  const bg = el("circle", {cx, cy, r: r - sw/2 - 2, fill:"var(--bg-card2)"});
-  svg.insertBefore(bg, svg.firstChild);
-
-  return svg;
-}
-
-// ═══════════════════════════════════════════════════
-// VIEWS
-// ═══════════════════════════════════════════════════
-
-// ── AUTH ────────────────────────────────────────────
-function AuthView(){
-  let emailVal = "connect@nexaflow.bar";
-  let passVal  = "admin@123";
-
-  function tryLogin(){
-    errDiv.textContent = "";
-    const u = USERS.find(u => u.email === emailVal && u.pass === passVal);
-    if(u){
-      const saved = loadUserState(u);
-      setState({user:u, status:saved.status, timeline:saved.timeline});
-    } else {
-      errDiv.textContent = "Incorrect email or password.";
-    }
-  }
-
-  const emailIn = el("input", {
-    class:"input", type:"email", value:emailVal,
-    placeholder:"your@nexaflow.bar",
-    on:{ input: e => { emailVal = e.target.value; } }
-  });
-  const passIn = el("input", {
-    class:"input", type:"password", value:passVal,
-    placeholder:"••••••••",
-    on:{
-      input: e => { passVal = e.target.value; },
-      keydown: e => { if(e.key === "Enter") tryLogin(); }
-    }
-  });
-  const errDiv = div("err-msg");
-
-  const signInBtn = el("button", {class:"btn btn-primary"});
-  signInBtn.textContent = "Sign in →";
-  signInBtn.style.cssText = "width:100%;margin-top:18px;justify-content:center;font-size:14px;padding:11px;";
-  signInBtn.addEventListener("click", tryLogin);
-
-  const card = div("auth-card fade-up");
-
-  // Logo row
-  const logoRow = div();
-  logoRow.style.cssText = "display:flex;align-items:center;gap:12px;margin-bottom:28px;";
-  const logoMark = div("logo-mark"); logoMark.textContent = "N";
-  const logoText = div();
-  const logoName = div(); logoName.style.cssText = "font-size:18px;font-weight:700;"; logoName.textContent = "NexaFlow";
-  const logoSub  = div(); logoSub.style.cssText  = "font-size:11px;color:var(--text-2);"; logoSub.textContent = "Command Centre";
-  logoText.appendChild(logoName); logoText.appendChild(logoSub);
-  logoRow.appendChild(logoMark); logoRow.appendChild(logoText);
-
-  const title = div("auth-title"); title.textContent = "Welcome back";
-  const sub   = div("auth-sub");  sub.textContent   = "Sign in to your NexaFlow workspace";
-
-  const fEmail = div("field-grp");
-  const lEmail = el("label", {class:"field-lbl"}); lEmail.textContent = "Email address";
-  fEmail.appendChild(lEmail); fEmail.appendChild(emailIn);
-
-  const fPass = div("field-grp");
-  const lPass = el("label", {class:"field-lbl"}); lPass.textContent = "Password";
-  fPass.appendChild(lPass); fPass.appendChild(passIn);
-
-  const sep = div("sep");
-
-  const hint = div(); hint.style.cssText = "font-size:11.5px;color:var(--text-2);margin-bottom:8px;";
-  hint.textContent = "Quick login — click to prefill";
-
-  const demoRow = div(); demoRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
-  USERS.forEach(u => {
-    const b = el("button", {class:"btn btn-outline btn-sm"});
-    b.textContent = `${u.name.split(" ")[0]} (${u.role})`;
-    b.addEventListener("click", () => {
-      emailIn.value = u.email;
-      passIn.value  = u.pass;
-      emailVal = u.email;
-      passVal  = u.pass;
-    });
-    demoRow.appendChild(b);
-  });
-
-  [logoRow, title, sub, fEmail, fPass, errDiv, signInBtn, sep, hint, demoRow].forEach(n => card.appendChild(n));
-  return div("auth-wrap", card);
-}
-
-// ── SIDEBAR ─────────────────────────────────────────
-function SidebarView(){
-  const NAV = [
-    {id:"dashboard", icon:"◈", label:"Dashboard"},
-    {id:"team",      icon:"◎", label:"Team"},
-    {id:"analytics", icon:"◉", label:"Analytics"},
-    {id:"settings",  icon:"⊙", label:"Settings"},
-  ];
-
-  const sb = div(`sidebar${APP.collapsed ? " collapsed" : ""}`);
-
-  // Logo
-  const logo = div("sb-logo");
-  const lm = div("logo-mark"); lm.textContent = "N";
-  const lt = div("logo-text");
-  const ln = div("logo-name"); ln.textContent = "NexaFlow";
-  const ls = div("logo-sub");  ls.textContent = "Workspace";
-  lt.appendChild(ln); lt.appendChild(ls);
-  logo.appendChild(lm); logo.appendChild(lt);
-
-  // Nav
-  const nav = div("sb-nav");
-  NAV.forEach(n => {
-    const item = el("button", {class:`nav-item${APP.page === n.id ? " active" : ""}`});
-    item.addEventListener("click", () => setState({page: n.id}));
-    const icon = span("nav-icon"); icon.textContent = n.icon;
-    const lbl  = span("nav-lbl");  lbl.textContent  = n.label;
-    item.appendChild(icon); item.appendChild(lbl);
-    nav.appendChild(item);
-  });
-
-  // Bottom
-  const bottom = div("sb-bottom");
-
-  const signout = el("button", {class:"nav-item"});
-  signout.addEventListener("click", () => setState({user:null, status:"checked-out", timeline:[]}));
-  const soIcon = span("nav-icon"); soIcon.textContent = "↩";
-  const soLbl  = span("nav-lbl");  soLbl.textContent  = "Sign Out";
-  signout.appendChild(soIcon); signout.appendChild(soLbl);
-
-  const chip = div("user-chip");
-  chip.appendChild(Avatar(APP.user.avatar, "sm"));
-  const ui = div("user-info");
-  const un = div("user-name"); un.textContent = APP.user.name;
-  const ur = div("user-role-lbl"); ur.textContent = APP.user.role;
-  ui.appendChild(un); ui.appendChild(ur);
-  chip.appendChild(ui);
-
-  bottom.appendChild(signout);
-  bottom.appendChild(chip);
-
-  sb.appendChild(logo);
-  sb.appendChild(nav);
-  sb.appendChild(bottom);
-  return sb;
-}
-
-// ── TOPBAR ──────────────────────────────────────────
-function TopbarView(){
-  const titles = {dashboard:"Dashboard", team:"Team", analytics:"Analytics", settings:"Settings"};
-  const cfg    = STATUS_CFG[APP.status] || STATUS_CFG["checked-out"];
-
-  const bar = div("topbar");
-
-  const menuBtn = div("icon-btn"); menuBtn.textContent = "☰";
-  menuBtn.addEventListener("click", () => setState({collapsed: !APP.collapsed}));
-
-  const titleBlock = div();
-  titleBlock.style.flex = "1";
-  const titleEl = div("tb-title"); titleEl.textContent = titles[APP.page] || "Dashboard";
-  const subEl   = div("tb-sub");   subEl.textContent   = nowDate();
-  titleBlock.appendChild(titleEl); titleBlock.appendChild(subEl);
-
-  const sbadge = div("badge");
-  sbadge.style.background = cfg.bg;
-  sbadge.style.color      = cfg.color;
-  sbadge.style.fontSize   = "12px";
-  const si = span(); si.textContent = cfg.icon;
-  if(APP.status !== "checked-out") si.classList.add("pulse");
-  sbadge.appendChild(si);
-  sbadge.appendChild(document.createTextNode(" " + cfg.label));
-
-  const clockEl = span();
-  clockEl.style.cssText = "font-family:var(--mono);font-size:13px;color:var(--text-2);min-width:38px;";
-  clockEl.textContent = now5();
-
-  const themeBtn = div("icon-btn");
-  themeBtn.textContent = APP.theme === "dark" ? "☀" : "🌙";
-  themeBtn.addEventListener("click", () => {
-    const t = APP.theme === "dark" ? "light" : "dark";
-    document.body.setAttribute("data-theme", t);
-    localStorage.setItem("nf-theme", t);
-    setState({theme: t});
-  });
-
-  [menuBtn, titleBlock, sbadge, clockEl, themeBtn].forEach(n => bar.appendChild(n));
-  return bar;
-}
-
-// ── DASHBOARD ───────────────────────────────────────
-function DashboardView(){
-  const {status, timeline} = APP;
-
-  // Compute totals from real timeline
-  let workMin = 0, breakMin = 0, meetMin = 0, callMin = 0, focusMin = 0;
-  const completed = timeline.filter(t => t.end && t.duration !== null && t.duration !== undefined);
-  completed.forEach(t => {
-    if(t.type === "checked-in") workMin  += t.duration;
-    if(t.type === "break")      breakMin += t.duration;
-    if(t.type === "meeting")    meetMin  += t.duration;
-    if(t.type === "call")       callMin  += t.duration;
-    if(t.type === "focus")      focusMin += t.duration;
-  });
-  // Add current open session
-  const last = timeline.length ? timeline[timeline.length - 1] : null;
-  const curMin = (last && !last.end) ? elapsed(last.start) : 0;
-  if(last && !last.end){
-    if(last.type === "checked-in") workMin  += curMin;
-    if(last.type === "break")      breakMin += curMin;
-    if(last.type === "meeting")    meetMin  += curMin;
-    if(last.type === "call")       callMin  += curMin;
-    if(last.type === "focus")      focusMin += curMin;
-  }
-
-  const totalMin = workMin + breakMin + meetMin + callMin + focusMin;
-
-  // Status change handler
-  function changeStatus(ns){
-    const t = now5();
-    let tl = [...timeline];
-    if(tl.length){
-      const prev = tl[tl.length - 1];
-      if(!prev.end){
-        tl[tl.length - 1] = {...prev, end: t, duration: elapsed(prev.start)};
-      }
-    }
-    if(ns !== "checked-out"){
-      tl.push({id: Date.now(), type: ns, start: t, end: null, duration: null});
-    }
-    setState({status: ns, timeline: tl});
-  }
-
-  const wrap = div("fade-up");
-
-  // ── Stat row ──
-  const statRow = div("grid4");
-  [
-    StatCard("Today's Work",  fmt(workMin),   "Active time logged"),
-    StatCard("Break Time",    fmt(breakMin),  "Total rest"),
-    StatCard("Meetings",      fmt(meetMin),   "In meetings today"),
-    StatCard("Total Logged",  fmt(totalMin),  "All sessions today"),
-  ].forEach(c => statRow.appendChild(c));
-
-  // ── Status + Actions ──
-  const statusCard = div("card");
-  const shdr = div("sec-hdr");
-  const sttl = div("sec-title"); sttl.textContent = "Your Status";
-  shdr.appendChild(sttl);
-  shdr.appendChild(StatusBadge(status));
-  statusCard.appendChild(shdr);
-
-  const saRow = div("sa-row");
-  const ACTIONS = [
-    {key:"checked-in",  label:"Check In",  cls:"btn-success", disabled: status !== "checked-out"},
-    {key:"checked-out", label:"Check Out", cls:"btn-danger",  disabled: status === "checked-out"},
-    {key:"break",       label:"Break",     cls:"btn-outline", disabled: status === "checked-out" || status === "break"},
-    {key:"meeting",     label:"Meeting",   cls:"btn-outline", disabled: status === "checked-out" || status === "meeting"},
-    {key:"call",        label:"Call",      cls:"btn-outline", disabled: status === "checked-out" || status === "call"},
-    {key:"focus",       label:"Focus",     cls:"btn-outline", disabled: status === "checked-out" || status === "focus"},
-  ];
-  ACTIONS.forEach(a => {
-    saRow.appendChild(mkBtn(a.cls + " btn-sm", a.label, () => changeStatus(a.key), a.disabled));
-  });
-  statusCard.appendChild(saRow);
-
-  // ── Timeline ──
-  const tlCard = div("card");
-  const thdr = div("sec-hdr");
-  const tttl = div("sec-title"); tttl.textContent = "Today's Timeline";
-  thdr.appendChild(tttl);
-  tlCard.appendChild(thdr);
-
-  const tlWrap = div("tl");
-  if(timeline.length === 0){
-    const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:20px 0;";
-    empty.textContent = "No activity yet. Click Check In to start.";
-    tlWrap.appendChild(empty);
-  } else {
-    [...timeline].reverse().forEach(t => {
-      const c = STATUS_CFG[t.type] || STATUS_CFG["checked-in"];
-      const item = div("tl-item");
-
-      const dot = div("tl-dot");
-      dot.style.borderColor = c.color;
-      dot.style.color       = c.color;
-      dot.style.background  = c.bg;
-      dot.textContent       = c.icon;
-
-      const body = div();
-      const lbl  = div("tl-lbl"); lbl.textContent = c.label;
-      const time = div("tl-time");
-      let timeStr = t.start;
-      if(t.end) timeStr += ` → ${t.end}`;
-      else       timeStr += " → now";
-      if(t.duration !== null && t.duration !== undefined) timeStr += ` · ${fmt(t.duration)}`;
-      time.textContent = timeStr;
-      body.appendChild(lbl); body.appendChild(time);
-
-      item.appendChild(dot); item.appendChild(body);
-
-      if(!t.end){
-        const tag = span("tag"); tag.textContent = "active";
-        tag.style.cssText = "background:var(--indigo-lo);color:var(--indigo-hi);margin-left:auto;";
-        item.appendChild(tag);
-      }
-      tlWrap.appendChild(item);
-    });
-  }
-  tlCard.appendChild(tlWrap);
-
-  // ── Donut ──
-  const distCard = div("card");
-  const dttl = div("sec-title"); dttl.textContent = "Time Distribution";
-  distCard.appendChild(dttl);
-
-  const distData = [
-    {l:"Active Work", v:workMin,  color:"#6366f1"},
-    {l:"Breaks",      v:breakMin, color:"#f59e0b"},
-    {l:"Meetings",    v:meetMin,  color:"#0ea5e9"},
-    {l:"Calls",       v:callMin,  color:"#8b5cf6"},
-    {l:"Focus",       v:focusMin, color:"#d946ef"},
-  ].filter(d => d.v > 0);
-
-  if(distData.length){
-    const dWrap = div("donut-wrap");
-    dWrap.appendChild(DonutChart(distData));
-    distCard.appendChild(dWrap);
-    const distTotal = distData.reduce((a,d) => a+d.v, 0) || 1;
-    distData.forEach(d => {
-      const row = div("pie-row");
-      const dot = span("pie-dot"); dot.style.background = d.color;
-      const name = span("pie-name"); name.textContent = d.l;
-      const val  = span("pie-val"); val.textContent   = `${Math.round(d.v/distTotal*100)}%`;
-      row.appendChild(dot); row.appendChild(name); row.appendChild(val);
-      distCard.appendChild(row);
-    });
-  } else {
-    const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:24px 0;";
-    empty.textContent = "Log activity to see breakdown";
-    distCard.appendChild(empty);
-  }
-
-  // ── Quick Links ──
-  const qlCard = div("card");
-  const qttl = div("sec-title"); qttl.style.marginBottom = "12px"; qttl.textContent = "Quick Access";
-  qlCard.appendChild(qttl);
-
-  QUICK_LINKS.forEach(lk => {
-    const a = el("a", {class:"ql-item", href:lk.href, target:"_blank", rel:"noopener noreferrer"});
-    const icon = div("ql-icon"); icon.textContent = lk.icon; icon.style.background = lk.bg;
-    const info = div();
-    const iName = div(); iName.style.cssText = "font-size:13px;font-weight:500;"; iName.textContent = lk.label;
-    const iSub  = div(); iSub.style.cssText  = "font-size:11px;color:var(--text-2);"; iSub.textContent  = lk.sub;
-    info.appendChild(iName); info.appendChild(iSub);
-    const arrow = span(); arrow.style.cssText = "margin-left:auto;color:var(--text-3);font-size:12px;"; arrow.textContent = "↗";
-    a.appendChild(icon); a.appendChild(info); a.appendChild(arrow);
-    qlCard.appendChild(a);
-  });
-
-  // ── Layout ──
-  const right = div("col-stack");
-  [statusCard, distCard, qlCard].forEach(c => right.appendChild(c));
-
-  const left = div("col-stack");
-  left.appendChild(tlCard);
-
-  const main = div("grid-main");
-  main.appendChild(left); main.appendChild(right);
-
-  wrap.appendChild(statRow);
-  wrap.appendChild(main);
-  return wrap;
-}
-
-// ── TEAM ────────────────────────────────────────────
-function TeamView(){
-  const wrap = div("fade-up");
-
-  if(APP.user.role !== "Admin"){
-    const card = div("card");
-    card.style.textAlign = "center";
-    card.style.padding = "40px";
-    card.style.color = "var(--text-2)";
-    card.textContent = "🔒 Admin access required to view team data.";
-    wrap.appendChild(card);
-    return wrap;
-  }
-
-  // Build real team data from USERS + their stored states
-  const teamData = USERS.map(u => {
-    const s = loadUserState(u);
-    return {
-      id:     u.id,
-      name:   u.name,
-      avatar: u.avatar,
-      role:   u.role,
-      status: s.status,
-      timeline: s.timeline,
-    };
-  });
-
-  const activeCount  = teamData.filter(m => ["checked-in","focus","call"].includes(m.status)).length;
-  const sessionCount = teamData.filter(m => ["break","meeting"].includes(m.status)).length;
-  const awayCount    = teamData.filter(m => m.status === "checked-out").length;
-
-  const statRow = div("grid4");
-  [
-    StatCard("Team Members",  String(teamData.length), "Registered users"),
-    StatCard("Working Now",   String(activeCount),     "Checked in"),
-    StatCard("In Session",    String(sessionCount),    "Break or meeting"),
-    StatCard("Away",          String(awayCount),       "Checked out"),
-  ].forEach(c => statRow.appendChild(c));
-
-  // Table
-  const tableCard = div("card");
-  const thdr = div("sec-hdr");
-  const tttl = div("sec-title"); tttl.textContent = "Live Team Status";
-  const tsub = span(); tsub.style.cssText = "font-size:12px;color:var(--text-2);"; tsub.textContent = "Based on saved sessions";
-  thdr.appendChild(tttl); thdr.appendChild(tsub);
-  tableCard.appendChild(thdr);
-
-  const thead = el("thead");
-  const htr = el("tr");
-  ["Member","Role","Status","Today's Work","Sessions"].forEach(h => {
-    const th = el("th"); th.textContent = h; htr.appendChild(th);
-  });
-  thead.appendChild(htr);
-
-  const tbody = el("tbody");
-  teamData.forEach(m => {
-    const tl = m.timeline;
-    let workMin = 0;
-    tl.filter(t => t.end && t.type === "checked-in").forEach(t => workMin += (t.duration || 0));
-    // if currently checked-in, add live time
-    const openEntry = tl.find(t => !t.end);
-    if(openEntry && openEntry.type === "checked-in") workMin += elapsed(openEntry.start);
-    const sessions = tl.filter(t => t.end).length + (openEntry ? 1 : 0);
-
-    const tr = el("tr");
-
-    const tdName = el("td");
-    const nameRow = div(); nameRow.style.cssText = "display:flex;align-items:center;gap:9px;";
-    nameRow.appendChild(Avatar(m.avatar, "sm"));
-    const nameSpan = span(); nameSpan.textContent = m.name;
-    nameRow.appendChild(nameSpan);
-    tdName.appendChild(nameRow);
-
-    const tdRole = el("td");
-    const roleTag = span("tag"); roleTag.textContent = m.role;
-    roleTag.style.cssText = m.role === "Admin"
-      ? "background:var(--indigo-lo);color:var(--indigo-hi);"
-      : "background:rgba(16,185,129,.1);color:#34d399;";
-    tdRole.appendChild(roleTag);
-
-    const tdStatus = el("td"); tdStatus.appendChild(StatusBadge(m.status));
-
-    const tdWork = el("td");
-    tdWork.style.fontFamily = "var(--mono)";
-    tdWork.style.fontSize   = "12px";
-    tdWork.textContent = fmt(workMin);
-
-    const tdSess = el("td");
-    tdSess.style.fontFamily = "var(--mono)";
-    tdSess.style.fontSize   = "12px";
-    tdSess.style.color      = "var(--text-2)";
-    tdSess.textContent = String(sessions);
-
-    tr.appendChild(tdName); tr.appendChild(tdRole); tr.appendChild(tdStatus);
-    tr.appendChild(tdWork); tr.appendChild(tdSess);
-    tbody.appendChild(tr);
-  });
-
-  const table = el("table", {class:"tbl"});
-  table.appendChild(thead); table.appendChild(tbody);
-  tableCard.appendChild(table);
-
-  wrap.appendChild(statRow);
-  wrap.appendChild(tableCard);
-  return wrap;
-}
-
-// ── ANALYTICS ───────────────────────────────────────
-function AnalyticsView(){
-  const wrap = div("fade-up");
-  const {timeline} = APP;
-
-  // Build real daily breakdown from today's timeline
-  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const today = new Date().getDay(); // 0=Sun
-
-  // Build a 7-day buckets using stored data
-  // For now we only have today's real data — show it prominently
-  let workMin=0, breakMin=0, meetMin=0, callMin=0, focusMin=0;
-  timeline.filter(t => t.end).forEach(t => {
-    if(t.type==="checked-in") workMin  += t.duration||0;
-    if(t.type==="break")      breakMin += t.duration||0;
-    if(t.type==="meeting")    meetMin  += t.duration||0;
-    if(t.type==="call")       callMin  += t.duration||0;
-    if(t.type==="focus")      focusMin += t.duration||0;
-  });
-  const openEntry = timeline.find(t => !t.end);
-  if(openEntry){
-    const cur = elapsed(openEntry.start);
-    if(openEntry.type==="checked-in") workMin  += cur;
-    if(openEntry.type==="break")      breakMin += cur;
-    if(openEntry.type==="meeting")    meetMin  += cur;
-    if(openEntry.type==="call")       callMin  += cur;
-    if(openEntry.type==="focus")      focusMin += cur;
-  }
-
-  const todayTotal = workMin + breakMin + meetMin + callMin + focusMin;
-  const sessions   = timeline.length;
-  const prodPct    = todayTotal > 0 ? Math.round((workMin/todayTotal)*100) : 0;
-  const avgPerSess = sessions > 0 ? Math.round(todayTotal / sessions) : 0;
-
-  const statRow = div("grid4");
-  [
-    StatCard("Today Total",    fmt(todayTotal), "All logged time today"),
-    StatCard("Active Work",    fmt(workMin),    "Productive time"),
-    StatCard("Productivity",   `${prodPct}%`,   "Active vs total"),
-    StatCard("Sessions",       String(sessions),"Check-ins today"),
-  ].forEach(c => statRow.appendChild(c));
-
-  // Per-status breakdown table
-  const breakdownCard = div("card");
-  const bttl = div("sec-title"); bttl.style.marginBottom = "16px"; bttl.textContent = "Today's Breakdown";
-  breakdownCard.appendChild(bttl);
-
-  const rows = [
-    {label:"Active Work", min:workMin,  color:"#6366f1"},
-    {label:"Breaks",      min:breakMin, color:"#f59e0b"},
-    {label:"Meetings",    min:meetMin,  color:"#0ea5e9"},
-    {label:"Calls",       min:callMin,  color:"#8b5cf6"},
-    {label:"Focus Mode",  min:focusMin, color:"#d946ef"},
-  ];
-  const maxMin = Math.max(...rows.map(r => r.min), 1);
-  rows.forEach(r => {
-    const row = div(); row.style.cssText = "display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:10px;";
-    const lbl = span(); lbl.style.cssText = "width:90px;color:var(--text-2);flex-shrink:0;"; lbl.textContent = r.label;
-    const pb = div("prog"); pb.style.flex = "1";
-    const pf = div("prog-fill");
-    pf.style.width      = `${(r.min/maxMin)*100}%`;
-    pf.style.background = r.color;
-    pb.appendChild(pf);
-    const valSpan = span(); valSpan.style.cssText = "font-family:var(--mono);color:var(--text-2);width:50px;text-align:right;flex-shrink:0;"; valSpan.textContent = fmt(r.min);
-    row.appendChild(lbl); row.appendChild(pb); row.appendChild(valSpan);
-    breakdownCard.appendChild(row);
-  });
-
-  // Session list
-  const sessCard = div("card");
-  const sttl = div("sec-title"); sttl.style.marginBottom = "14px"; sttl.textContent = "Session Log";
-  sessCard.appendChild(sttl);
-
-  if(timeline.length === 0){
-    const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:20px 0;";
-    empty.textContent = "No sessions recorded today.";
-    sessCard.appendChild(empty);
-  } else {
-    const table = el("table", {class:"tbl"});
-    const thead = el("thead");
-    const htr = el("tr");
-    ["#","Type","Start","End","Duration"].forEach(h => {
-      const th = el("th"); th.textContent = h; htr.appendChild(th);
-    });
-    thead.appendChild(htr);
-    const tbody = el("tbody");
-    timeline.forEach((t, i) => {
-      const c = STATUS_CFG[t.type] || STATUS_CFG["checked-in"];
-      const tr = el("tr");
-      const tdi = el("td"); tdi.style.cssText = "font-family:var(--mono);font-size:11px;color:var(--text-3);"; tdi.textContent = String(i+1);
-      const tdt = el("td");
-      const badge = span("tag"); badge.textContent = c.label; badge.style.cssText = `background:${c.bg};color:${c.color};`;
-      tdt.appendChild(badge);
-      const tds = el("td"); tds.style.fontFamily = "var(--mono)"; tds.style.fontSize = "12px"; tds.textContent = t.start;
-      const tde = el("td"); tde.style.fontFamily = "var(--mono)"; tde.style.fontSize = "12px"; tde.style.color = "var(--text-2)"; tde.textContent = t.end || "ongoing";
-      const tdd = el("td"); tdd.style.fontFamily = "var(--mono)"; tdd.style.fontSize = "12px"; tdd.textContent = t.duration !== null && t.duration !== undefined ? fmt(t.duration) : "—";
-      tr.appendChild(tdi); tr.appendChild(tdt); tr.appendChild(tds); tr.appendChild(tde); tr.appendChild(tdd);
-      tbody.appendChild(tr);
-    });
-    table.appendChild(thead); table.appendChild(tbody);
-    sessCard.appendChild(table);
-  }
-
-  const clearBtn = mkBtn("btn-danger btn-sm", "Clear Today's Data", () => {
-    if(confirm("Clear all session data for today?")) setState({status:"checked-out", timeline:[]});
-  });
-  clearBtn.style.marginTop = "14px";
-  sessCard.appendChild(clearBtn);
-
-  wrap.appendChild(statRow);
-  wrap.appendChild(breakdownCard);
-  wrap.appendChild(el("div", {style:{height:"16px"}}));
-  wrap.appendChild(sessCard);
-  return wrap;
-}
-
-// ── SETTINGS ────────────────────────────────────────
-function SettingsView(){
-  const u = APP.user;
-  const wrap = div("fade-up");
-  wrap.style.maxWidth = "600px";
-
-  // Profile card
-  const profileCard = div("card");
-  profileCard.style.marginBottom = "16px";
-  const pttl = div("sec-title"); pttl.style.marginBottom = "16px"; pttl.textContent = "Profile";
-  profileCard.appendChild(pttl);
-
-  const profileRow = div(); profileRow.style.cssText = "display:flex;align-items:center;gap:14px;margin-bottom:18px;";
-  profileRow.appendChild(Avatar(u.avatar, "md"));
-  const profileInfo = div();
-  const pName = div(); pName.style.cssText = "font-weight:600;font-size:15px;"; pName.textContent = u.name;
-  const pEmail = div(); pEmail.style.cssText = "font-size:12.5px;color:var(--text-2);"; pEmail.textContent = u.email;
-  const pRole = span("tag"); pRole.textContent = u.role;
-  pRole.style.cssText = "margin-top:5px;background:var(--indigo-lo);color:var(--indigo-hi);";
-  profileInfo.appendChild(pName); profileInfo.appendChild(pEmail); profileInfo.appendChild(pRole);
-  profileRow.appendChild(profileInfo);
-  profileCard.appendChild(profileRow);
-
-  // Name input
-  const fName = div("field-grp");
-  const lName = el("label", {class:"field-lbl"}); lName.textContent = "Display Name";
-  const iName = el("input", {class:"input", value:u.name});
-  fName.appendChild(lName); fName.appendChild(iName);
-
-  // Email input
-  const fEmail = div("field-grp");
-  const lEmail = el("label", {class:"field-lbl"}); lEmail.textContent = "Email";
-  const iEmail = el("input", {class:"input", type:"email", value:u.email});
-  iEmail.disabled = true;
-  iEmail.style.opacity = "0.5";
-  fEmail.appendChild(lEmail); fEmail.appendChild(iEmail);
-
-  const saveBtn = mkBtn("btn-primary btn-sm", "Save Changes", () => {
-    const newName = iName.value.trim();
-    if(newName && newName !== APP.user.name){
-      APP.user.name = newName;
-      APP.user.avatar = newName.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
-      saveUserState();
-      render();
-    }
-  });
-
-  [fName, fEmail, saveBtn].forEach(n => profileCard.appendChild(n));
-
-  // Theme card
-  const themeCard = div("card");
-  themeCard.style.marginBottom = "16px";
-  const tttl = div("sec-title"); tttl.style.marginBottom = "14px"; tttl.textContent = "Appearance";
-  themeCard.appendChild(tttl);
-
-  const themeRow = div(); themeRow.style.cssText = "display:flex;gap:9px;";
-  ["dark","light"].forEach(t => {
-    const b = mkBtn(`btn-sm ${APP.theme===t?"btn-primary":"btn-outline"}`, t==="dark"?"🌙 Dark":"☀️ Light", () => {
-      document.body.setAttribute("data-theme", t);
-      localStorage.setItem("nf-theme", t);
-      setState({theme: t});
-    });
-    themeRow.appendChild(b);
-  });
-  themeCard.appendChild(themeRow);
-
-  // Status reset card
-  const resetCard = div("card");
-  resetCard.style.marginBottom = "16px";
-  const rttl = div("sec-title"); rttl.style.marginBottom = "8px"; rttl.textContent = "Session Management";
-  const rsub = div(); rsub.style.cssText = "font-size:12.5px;color:var(--text-2);margin-bottom:14px;";
-  rsub.textContent = "Reset your current session data. This cannot be undone.";
-  const resetBtn = mkBtn("btn-danger btn-sm", "Reset Today's Sessions", () => {
-    if(confirm("This will clear all your session data for today. Continue?")) setState({status:"checked-out", timeline:[]});
-  });
-  resetCard.appendChild(rttl); resetCard.appendChild(rsub); resetCard.appendChild(resetBtn);
-
-  // Info card
-  const infoCard = div("card");
-  const ittl = div("sec-title"); ittl.style.marginBottom = "12px"; ittl.textContent = "Workspace Info";
-  [
-    ["Version",    "1.0.0"],
-    ["Users",      String(USERS.length)],
-    ["Your Role",  u.role],
-    ["User ID",    `#${u.id}`],
-  ].forEach(([k,v]) => {
-    const row = div(); row.style.cssText = "display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;";
-    const kEl = span(); kEl.style.color = "var(--text-2)"; kEl.textContent = k;
-    const vEl = span(); vEl.style.fontFamily = "var(--mono)"; vEl.style.fontSize = "12px"; vEl.textContent = v;
-    row.appendChild(kEl); row.appendChild(vEl);
-    infoCard.appendChild(row);
-  });
-  infoCard.style.marginBottom = "16px";
-  infoCard.insertBefore(ittl, infoCard.firstChild);
-
-  [profileCard, themeCard, resetCard, infoCard].forEach(c => wrap.appendChild(c));
-  return wrap;
-}
-
-// ═══════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════
-function render(){
-  document.body.setAttribute("data-theme", APP.theme);
-  const root = document.getElementById("app");
-  root.innerHTML = "";
-
-  if(!APP.user){
-    root.appendChild(AuthView());
-    return;
-  }
-
-  const views = {
-    dashboard: DashboardView,
-    team:      TeamView,
-    analytics: AnalyticsView,
-    settings:  SettingsView,
-  };
-  const View = views[APP.page] || DashboardView;
-
-  const app = div("app");
-  app.appendChild(SidebarView());
-
-  const mainEl = div("main");
-  mainEl.appendChild(TopbarView());
-
-  const content = div("content");
-  content.appendChild(View());
-  mainEl.appendChild(content);
-  app.appendChild(mainEl);
-
-  root.appendChild(app);
-}
-
-// ── Clock tick every 60s ──
-setInterval(render, 60000);
-
-// ── Responsive collapse ──
-window.addEventListener("resize", () => {
-  if(window.innerWidth < 960 && !APP.collapsed) setState({collapsed: true});
-});
-
-// ── Boot ──
-render();
-</script>
+
+        :root {
+            --bg-app: #0b0d14;
+            --bg-card: #111520;
+            --bg-card2: #181d2c;
+            --bg-glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hi: rgba(99, 102, 241, 0.5);
+            --text-1: #eef2ff;
+            --text-2: #7c8898;
+            --text-3: #3d4659;
+            --indigo: #6366f1;
+            --indigo-hi: #a5b4fc;
+            --indigo-lo: rgba(99, 102, 241, 0.14);
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --sky: #0ea5e9;
+            --violet: #8b5cf6;
+            --rose: #f43f5e;
+            --font: 'DM Sans', system-ui, sans-serif;
+            --mono: 'DM Mono', monospace;
+            --r1: 7px;
+            --r2: 13px;
+            --trans: 0.17s cubic-bezier(.4, 0, .2, 1);
+            --sidebar-w: 215px;
+        }
+
+        [data-theme="light"] {
+            --bg-app: #f0f4ff;
+            --bg-card: #ffffff;
+            --bg-card2: #f6f8ff;
+            --bg-glass: rgba(0, 0, 0, 0.025);
+            --border: rgba(0, 0, 0, 0.09);
+            --border-hi: rgba(99, 102, 241, 0.4);
+            --text-1: #0f172a;
+            --text-2: #475569;
+            --text-3: #94a3b8;
+            --indigo-lo: rgba(99, 102, 241, 0.09);
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg-app);
+            color: var(--text-1);
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: width var(--trans);
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 58px;
+        }
+
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 19px 15px;
+            border-bottom: 1px solid var(--border);
+            min-height: 64px;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.5px;
+        }
+
+        .logo-text {
+            overflow: hidden;
+            white-space: nowrap;
+            transition: opacity var(--trans);
+        }
+
+        .logo-name {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--text-1);
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--text-2);
+        }
+
+        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .nav-lbl,
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sb-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: var(--r1);
+            cursor: pointer;
+            color: var(--text-2);
+            font-size: 13.5px;
+            font-weight: 500;
+            white-space: nowrap;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: var(--font);
+            transition: background var(--trans), color var(--trans);
+        }
+
+        .nav-item:hover {
+            background: var(--bg-glass);
+            color: var(--text-1);
+        }
+
+        .nav-item.active {
+            background: var(--indigo-lo);
+            color: var(--indigo-hi);
+        }
+
+        .nav-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            width: 20px;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .sb-bottom {
+            padding: 10px 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 10px;
+            border-radius: var(--r1);
+        }
+
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .av-sm {
+            width: 28px;
+            height: 28px;
+            font-size: 11px;
+        }
+
+        .av-md {
+            width: 38px;
+            height: 38px;
+            font-size: 14px;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-1);
+            white-space: nowrap;
+        }
+
+        .user-role-lbl {
+            font-size: 10.5px;
+            color: var(--text-2);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .tb-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .tb-sub {
+            font-size: 11px;
+            color: var(--text-2);
+            margin-top: 1px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--r1);
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-2);
+            font-size: 16px;
+            transition: all var(--trans);
+            font-family: var(--font);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .icon-btn:hover {
+            color: var(--text-1);
+            border-color: var(--border-hi);
+            background: var(--indigo-lo);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            padding: 20px;
+        }
+
+        .card-sm {
+            padding: 16px;
+        }
+
+        .card-lbl {
+            font-size: 12px;
+            color: var(--text-2);
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .card-val {
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .card-sub {
+            font-size: 11.5px;
+            color: var(--text-2);
+            margin-top: 4px;
+        }
+
+        /* GRIDS */
+        .grid4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 18px;
+        }
+
+        .col-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 11px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 10.5px;
+            font-weight: 500;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: var(--r1);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--trans);
+            border: none;
+            font-family: var(--font);
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-2);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            color: var(--text-1);
+            border-color: var(--border-hi);
+            background: var(--indigo-lo);
+        }
+
+        .btn-danger {
+            background: rgba(244, 63, 94, .12);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, .25);
+        }
+
+        .btn-danger:hover {
+            background: rgba(244, 63, 94, .2);
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, .12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, .25);
+        }
+
+        .btn-success:hover {
+            background: rgba(16, 185, 129, .2);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12.5px;
+        }
+
+        .btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .sa-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        /* SECTION */
+        .sec-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .sec-title {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        /* TIMELINE */
+        .tl {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tl-item {
+            display: flex;
+            gap: 12px;
+            padding: 9px 0;
+            position: relative;
+        }
+
+        .tl-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 34px;
+            width: 1px;
+            height: calc(100% - 12px);
+            background: var(--border);
+        }
+
+        .tl-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            border: 2px solid;
+        }
+
+        /* DONUT */
+        .donut-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        /* QUICK LINKS */
+        .ql-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 13px;
+            border-radius: var(--r1);
+            border: 1px solid var(--border);
+            background: var(--bg-card2);
+            cursor: pointer;
+            transition: all var(--trans);
+            text-decoration: none;
+            color: var(--text-1);
+            margin-bottom: 8px;
+        }
+
+        .ql-item:hover {
+            border-color: var(--border-hi);
+            background: var(--indigo-lo);
+        }
+
+        .ql-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--r1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        /* PROGRESS */
+        .prog {
+            height: 5px;
+            border-radius: 100px;
+            background: var(--border);
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .prog-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width .7s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* TABLES */
+        .tbl {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tbl th {
+            font-size: 11px;
+            color: var(--text-2);
+            font-weight: 500;
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tbl td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .tbl tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* FORM */
+        .input {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: var(--r1);
+            padding: 9px 13px;
+            font-size: 13.5px;
+            color: var(--text-1);
+            font-family: var(--font);
+            width: 100%;
+            outline: none;
+            transition: border var(--trans);
+        }
+
+        .input:focus {
+            border-color: #6366f1;
+        }
+
+        .input::placeholder {
+            color: var(--text-3);
+        }
+
+        .field-lbl {
+            font-size: 12px;
+            color: var(--text-2);
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .field-grp {
+            margin-bottom: 15px;
+        }
+
+        /* PIE LEGEND */
+        .pie-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 9px;
+            font-size: 12.5px;
+        }
+
+        .pie-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+
+        .pie-name {
+            color: var(--text-2);
+            flex: 1;
+        }
+
+        .pie-val {
+            font-weight: 500;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        /* AUTH */
+        .auth-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg-app);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            padding: 32px;
+        }
+
+        .err-msg {
+            font-size: 12px;
+            color: #fb7185;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        .success-msg {
+            font-size: 12px;
+            color: #34d399;
+            margin-top: 8px;
+        }
+
+        /* SPINNER */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--indigo);
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* LOADING SCREEN */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 14px;
+            background: var(--bg-app);
+        }
+
+        .loading-screen .spinner {
+            width: 32px;
+            height: 32px;
+            border-width: 3px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .35;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp .3s ease both;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:960px) {
+            .grid4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-main {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 58px;
+            }
+
+            .sidebar .logo-text,
+            .sidebar .nav-lbl,
+            .sidebar .user-info {
+                opacity: 0;
+                width: 0;
+                pointer-events: none;
+            }
+        }
+
+        @media(max-width:600px) {
+            .content {
+                padding: 14px;
+            }
+
+            .grid4 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .topbar {
+                padding: 0 14px;
+                gap: 8px;
+            }
+        }
+
+        /* CONFIG MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            padding: 28px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .modal-sub {
+            font-size: 13px;
+            color: var(--text-2);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--indigo);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .sql-block {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: var(--r1);
+            padding: 12px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--indigo-hi);
+            white-space: pre;
+            overflow-x: auto;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            font-size: 11px;
+            padding: 4px 10px;
+            margin-top: 6px;
+        }
+
+        /* SAVED INDICATOR */
+        .saved-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            background: rgba(16, 185, 129, .1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, .2);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .saved-pill.show {
+            opacity: 1;
+        }
+
+        /* SETUP BANNER — shown before Supabase is configured */
+        .setup-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg-app);
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+    <div id="app">
+        <!-- Fallback visible immediately before JS runs -->
+        <div class="loading-screen">
+            <div class="spinner"></div>
+            <div style="color:var(--text-2);font-size:13px;">Starting NexaFlow…</div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // SUPABASE CONFIG
+        // ═══════════════════════════════════════════════════════════════
+        let SUPABASE_URL = localStorage.getItem("nf_sb_url") || "";
+        let SUPABASE_KEY = localStorage.getItem("nf_sb_key") || "";
+        let supabase = null;
+
+        function initSupabase() {
+            if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+                });
+                return true;
+            } catch (e) { console.error("Supabase init error:", e); return false; }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CONSTANTS
+        // ═══════════════════════════════════════════════════════════════
+        const STATUS_CFG = {
+            "checked-in": { label: "Checked In", color: "#10b981", bg: "rgba(16,185,129,.14)", icon: "●" },
+            "checked-out": { label: "Checked Out", color: "#64748b", bg: "rgba(100,116,139,.12)", icon: "○" },
+            "break": { label: "On Break", color: "#f59e0b", bg: "rgba(245,158,11,.14)", icon: "◐" },
+            "meeting": { label: "In Meeting", color: "#0ea5e9", bg: "rgba(14,165,233,.14)", icon: "◈" },
+            "call": { label: "On a Call", color: "#8b5cf6", bg: "rgba(139,92,246,.14)", icon: "◉" },
+            "focus": { label: "Focus Mode", color: "#d946ef", bg: "rgba(217,70,239,.14)", icon: "◎" },
+        };
+
+        const QUICK_LINKS = [
+            { icon: "💬", label: "WhatsApp Web", sub: "Open messaging", href: "https://web.whatsapp.com", bg: "rgba(37,211,102,.12)" },
+            { icon: "🧩", label: "Zoho CRM", sub: "Customer portal", href: "https://crm.zoho.com", bg: "rgba(99,102,241,.12)" },
+            { icon: "📅", label: "Google Calendar", sub: "View schedule", href: "https://calendar.google.com", bg: "rgba(234,67,53,.12)" },
+            { icon: "📊", label: "Google Sheets", sub: "Spreadsheets", href: "https://sheets.google.com", bg: "rgba(14,165,233,.12)" },
+            { icon: "🗂️", label: "Notion", sub: "Docs & tasks", href: "https://notion.so", bg: "rgba(255,255,255,.08)" },
+            { icon: "📧", label: "Gmail", sub: "Check inbox", href: "https://mail.google.com", bg: "rgba(234,67,53,.08)" },
+        ];
+
+        // ═══════════════════════════════════════════════════════════════
+        // APP STATE
+        // ═══════════════════════════════════════════════════════════════
+        const APP = {
+            ready: false,
+            authUser: null,
+            profile: null,
+            theme: localStorage.getItem("nf_theme") || "dark",
+            page: "dashboard",
+            collapsed: window.innerWidth < 960,
+            status: "checked-out",
+            currentSession: null,
+            timeline: [],
+            historyDate: null,
+            saving: false,
+            showSetup: false,
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // DOM HELPERS
+        // ═══════════════════════════════════════════════════════════════
+        function el(tag, attrs, ...kids) {
+            const e = document.createElement(tag);
+            if (attrs && typeof attrs === "object") {
+                for (const [k, v] of Object.entries(attrs)) {
+                    if (v === null || v === false || v === undefined) continue;
+                    if (k === "class") { e.className = v; }
+                    else if (k === "style" && typeof v === "object") { Object.assign(e.style, v); }
+                    else if (k === "on" && typeof v === "object") { for (const [ev, fn] of Object.entries(v)) e.addEventListener(ev, fn); }
+                    else { try { e.setAttribute(k, v); } catch (err) { } }
+                }
+            }
+            function addKid(k) {
+                if (k == null || k === false || k === undefined) return;
+                if (Array.isArray(k)) { k.forEach(addKid); return; }
+                if (k instanceof Node) e.appendChild(k);
+                else e.appendChild(document.createTextNode(String(k)));
+            }
+            kids.forEach(addKid);
+            return e;
+        }
+        function div(cls, ...kids) {
+            if (cls && typeof cls === "object" && !(cls instanceof Node)) return el("div", cls, ...kids);
+            return el("div", cls ? { class: cls } : null, ...kids);
+        }
+        function span(cls, ...kids) { return el("span", cls ? { class: cls } : null, ...kids); }
+        function mkBtn(cls, label, onClick, disabled) {
+            const b = el("button", { class: `btn ${cls}`, ...(disabled ? { disabled: true } : {}) });
+            b.textContent = label;
+            if (onClick) b.addEventListener("click", onClick);
+            return b;
+        }
+        function Avatar(initials, size = "sm") {
+            return div(`avatar av-${size}`, initials || "?");
+        }
+        function StatusBadge(status) {
+            const c = STATUS_CFG[status] || STATUS_CFG["checked-out"];
+            const badge = div("badge");
+            badge.style.background = c.bg;
+            badge.style.color = c.color;
+            const dot = span(); dot.textContent = c.icon;
+            if (status !== "checked-out") dot.classList.add("pulse");
+            badge.appendChild(dot);
+            badge.appendChild(document.createTextNode(" " + c.label));
+            return badge;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIME HELPERS
+        // ═══════════════════════════════════════════════════════════════
+        function nowISO() { return new Date().toISOString(); }
+        function nowDateStr() { return new Date().toISOString().slice(0, 10); }
+        function fmt(min) {
+            if (min == null || isNaN(min) || min <= 0) return "0m";
+            const h = Math.floor(min / 60), m = Math.round(min % 60);
+            return h > 0 ? `${h}h ${m}m` : `${m}m`;
+        }
+        function minutesBetween(start_iso, end_iso) {
+            if (!start_iso) return 0;
+            const end = end_iso ? new Date(end_iso) : new Date();
+            return Math.max(0, Math.round((end - new Date(start_iso)) / 60000));
+        }
+        function fmtTime(iso) {
+            if (!iso) return "—";
+            return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+        }
+        function nowFull() {
+            return new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        }
+        function now5() {
+            return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DATABASE LAYER
+        // ═══════════════════════════════════════════════════════════════
+        async function loadTodayTimeline() {
+            if (!supabase || !APP.profile) return;
+            const today = nowDateStr();
+            const { data, error } = await supabase
+                .from("sessions").select("*")
+                .eq("user_id", APP.profile.id).eq("work_date", today)
+                .order("started_at", { ascending: true });
+            if (error) { console.error("loadTodayTimeline:", error); return; }
+            APP.timeline = data || [];
+            APP.currentSession = APP.timeline.find(s => !s.ended_at) || null;
+            APP.status = APP.currentSession ? APP.currentSession.type : "checked-out";
+        }
+
+        async function loadDateTimeline(date, userId) {
+            if (!supabase) return [];
+            const { data, error } = await supabase.from("sessions").select("*")
+                .eq("user_id", userId || APP.profile.id).eq("work_date", date)
+                .order("started_at", { ascending: true });
+            if (error) { console.error(error); return []; }
+            return data || [];
+        }
+
+        async function loadRangeSessions(userId, fromDate, toDate) {
+            if (!supabase) return [];
+            const { data, error } = await supabase.from("sessions").select("*")
+                .eq("user_id", userId).gte("work_date", fromDate).lte("work_date", toDate)
+                .order("started_at", { ascending: true });
+            if (error) { console.error(error); return []; }
+            return data || [];
+        }
+
+        async function startSession(type) {
+            if (!supabase || !APP.profile) return null;
+            const { data, error } = await supabase.from("sessions").insert({
+                user_id: APP.profile.id, type, work_date: nowDateStr(),
+                started_at: nowISO(), ended_at: null, duration_minutes: null,
+            }).select().single();
+            if (error) { console.error("startSession:", error); return null; }
+            return data;
+        }
+
+        async function endSession(session) {
+            if (!supabase || !session) return;
+            const endTime = nowISO();
+            const dur = minutesBetween(session.started_at, endTime);
+            const { error } = await supabase.from("sessions").update({
+                ended_at: endTime, duration_minutes: dur,
+            }).eq("id", session.id);
+            if (error) console.error("endSession:", error);
+        }
+
+        async function loadTeamStatus() {
+            if (!supabase) return [];
+            const { data: profiles, error } = await supabase.from("profiles").select("*");
+            if (error) { console.error(error); return []; }
+            const today = nowDateStr();
+            const result = [];
+            for (const p of profiles) {
+                const { data: sessions } = await supabase.from("sessions").select("*")
+                    .eq("user_id", p.id).eq("work_date", today).order("started_at", { ascending: true });
+                const tl = sessions || [];
+                const open = tl.find(s => !s.ended_at);
+                const workMin = tl.filter(s => s.ended_at && s.type === "checked-in")
+                    .reduce((a, s) => a + (s.duration_minutes || 0), 0)
+                    + (open && open.type === "checked-in" ? minutesBetween(open.started_at) : 0);
+                result.push({
+                    id: p.id, name: p.full_name, avatar: p.avatar_initials, role: p.role,
+                    status: open ? open.type : "checked-out", workMin, sessions: tl.length
+                });
+            }
+            return result;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // STATUS CHANGE
+        // ═══════════════════════════════════════════════════════════════
+        async function changeStatus(newStatus) {
+            if (APP.saving) return;
+            APP.saving = true;
+            render();
+            if (APP.currentSession) await endSession(APP.currentSession);
+            if (newStatus !== "checked-out") await startSession(newStatus);
+            await loadTodayTimeline();
+            APP.saving = false;
+            render();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUTH
+        // ═══════════════════════════════════════════════════════════════
+        async function signIn(email, password) {
+            if (!supabase) return { error: { message: "Supabase not configured. Click 'Configure database' below." } };
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) return { error };
+            return { user: data.user };
+        }
+
+        async function signOut() {
+            if (!supabase) return;
+            if (APP.currentSession) await endSession(APP.currentSession);
+            await supabase.auth.signOut();
+            APP.authUser = null; APP.profile = null; APP.status = "checked-out";
+            APP.timeline = []; APP.currentSession = null; APP.page = "dashboard";
+            render();
+        }
+
+        async function loadProfile(userId) {
+            if (!supabase) return null;
+            const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
+            if (error) { console.error("loadProfile:", error); return null; }
+            return data;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // BOOT — FIX: always sets APP.ready = true so render() works
+        // ═══════════════════════════════════════════════════════════════
+        async function boot() {
+            document.body.setAttribute("data-theme", APP.theme);
+
+            // If no Supabase keys → go straight to setup screen
+            if (!SUPABASE_URL || !SUPABASE_KEY) {
+                APP.ready = true;
+                APP.showSetup = true;
+                render();
+                return;
+            }
+
+            // Try to init Supabase
+            const ok = initSupabase();
+            if (!ok) {
+                APP.ready = true;
+                APP.showSetup = true;
+                render();
+                return;
+            }
+
+            // Check for existing session
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    APP.authUser = session.user;
+                    APP.profile = await loadProfile(session.user.id);
+                    if (APP.profile) await loadTodayTimeline();
+                }
+            } catch (e) {
+                console.error("getSession error:", e);
+            }
+
+            APP.ready = true;
+            render();
+
+            // Auth state listener
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                if (event === "SIGNED_IN" && session?.user) {
+                    APP.authUser = session.user;
+                    APP.profile = await loadProfile(session.user.id);
+                    if (APP.profile) await loadTodayTimeline();
+                    render();
+                } else if (event === "SIGNED_OUT") {
+                    APP.authUser = null; APP.profile = null;
+                    APP.status = "checked-out"; APP.timeline = []; APP.currentSession = null;
+                    render();
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SETUP MODAL
+        // ═══════════════════════════════════════════════════════════════
+        const SQL_SCHEMA = `-- Run this in Supabase SQL Editor
+
+-- Profiles table
+create table profiles (
+  id uuid references auth.users primary key,
+  full_name text not null,
+  avatar_initials text default 'U',
+  role text default 'Staff',
+  created_at timestamptz default now()
+);
+alter table profiles enable row level security;
+create policy "Users can read all profiles"
+  on profiles for select using (auth.role() = 'authenticated');
+create policy "Users can update own profile"
+  on profiles for update using (auth.uid() = id);
+create policy "Users can insert own profile"
+  on profiles for insert with check (auth.uid() = id);
+
+-- Sessions table
+create table sessions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) not null,
+  type text not null,
+  work_date date not null,
+  started_at timestamptz not null,
+  ended_at timestamptz,
+  duration_minutes integer,
+  created_at timestamptz default now()
+);
+alter table sessions enable row level security;
+create policy "Users can read all sessions"
+  on sessions for select using (auth.role() = 'authenticated');
+create policy "Users can insert own sessions"
+  on sessions for insert with check (auth.uid() = user_id);
+create policy "Users can update own sessions"
+  on sessions for update using (auth.uid() = user_id);
+create policy "Users can delete own sessions"
+  on sessions for delete using (auth.uid() = user_id);`;
+
+        function SetupModal(canClose) {
+            let urlVal = SUPABASE_URL;
+            let keyVal = SUPABASE_KEY;
+
+            function saveAndReboot() {
+                const u = urlVal.trim(), k = keyVal.trim();
+                if (!u || !k) { errEl.textContent = "Both fields are required."; return; }
+                SUPABASE_URL = u; SUPABASE_KEY = k;
+                localStorage.setItem("nf_sb_url", u);
+                localStorage.setItem("nf_sb_key", k);
+                APP.showSetup = false;
+                APP.ready = false;
+                document.getElementById("app").innerHTML =
+                    '<div class="loading-screen"><div class="spinner"></div><div style="color:var(--text-2);font-size:13px;">Connecting…</div></div>';
+                boot();
+            }
+
+            const overlay = div("modal-overlay");
+            const box = div("modal-box");
+
+            if (canClose) {
+                const closeBtn = mkBtn("btn-outline btn-sm", "✕ Close", () => { APP.showSetup = false; render(); });
+                closeBtn.style.cssText = "margin-bottom:14px;";
+                box.appendChild(closeBtn);
+            }
+
+            const title = div("modal-title"); title.textContent = "⚙️ Connect Supabase Database";
+            const sub = div("modal-sub");
+            sub.innerHTML = "NexaFlow needs a free Supabase database so your data persists. Takes ~3 minutes. <strong>100% free.</strong>";
+
+            // Step 1
+            const s1 = makeStep("1", "Create a free Supabase project",
+                `Go to <strong>supabase.com</strong> → New Project → copy your <strong>Project URL</strong> and <strong>anon public</strong> key from Settings → API.`);
+
+            // Step 2
+            const s2body = div(); s2body.style.marginLeft = "30px";
+            const s2desc = div(); s2desc.style.cssText = "font-size:12px;color:var(--text-2);margin-bottom:8px;"; s2desc.textContent = "In Supabase → SQL Editor → paste and run:";
+            const sqlBlock = div("sql-block"); sqlBlock.textContent = SQL_SCHEMA;
+            const copyBtn = mkBtn("btn-outline copy-btn", "📋 Copy SQL", async () => {
+                await navigator.clipboard.writeText(SQL_SCHEMA).catch(() => { });
+                copyBtn.textContent = "✓ Copied!"; setTimeout(() => copyBtn.textContent = "📋 Copy SQL", 2000);
+            });
+            s2body.appendChild(s2desc); s2body.appendChild(sqlBlock); s2body.appendChild(copyBtn);
+            const s2 = makeStep("2", "Run the database schema", null, s2body);
+
+            // Step 3
+            const profileSQL = div("sql-block"); profileSQL.textContent =
+                `insert into profiles (id, full_name, avatar_initials, role)
+values (
+  '899154f7-e6f0-4157-b1e1-6e345d41d532',  -- from Auth → Users
+  'Abhishek Mishra',
+  'Am',
+  'Founder'                 -- or 'Staff'
+);`;
+            const s3body2 = div(); s3body2.style.marginLeft = "30px";
+            const s3d = div(); s3d.style.cssText = "font-size:12px;color:var(--text-2);margin-bottom:6px;"; s3d.innerHTML = "In Supabase → Authentication → Users → Add user. Then:";
+            s3body2.appendChild(s3d); s3body2.appendChild(profileSQL);
+            const s3 = makeStep("3", "Create user accounts", null, s3body2);
+
+            // Step 4 — keys
+            const s4body = div(); s4body.style.marginLeft = "30px";
+            const fUrl = div("field-grp");
+            const lUrl = el("label", { class: "field-lbl" }); lUrl.textContent = "Project URL (https://aocugthsqjhhszpzydmb.supabase.co)";
+            const iUrl = el("input", { class: "input", type: "text", placeholder: "https://aocugthsqjhhszpzydmb.supabase.co", value: urlVal });
+            iUrl.addEventListener("input", e => { urlVal = e.target.value; });
+            fUrl.appendChild(lUrl); fUrl.appendChild(iUrl);
+
+            const fKey = div("field-grp");
+            const lKey = el("label", { class: "field-lbl" }); lKey.textContent = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvY3VndGhzcWpoaHN6cHp5ZG1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDQxNTAsImV4cCI6MjA5MTU4MDE1MH0.1pzaPoTn4PZwz_U06_TaJ_FKMZMq6zvoWRP7JDnE_fI";
+            const iKey = el("input", { class: "input", type: "text", placeholder: "eyJhbGciOiJIUzI1NiIs…", value: keyVal });
+            iKey.addEventListener("input", e => { keyVal = e.target.value; });
+            fKey.appendChild(lKey); fKey.appendChild(iKey);
+
+            const errEl = div("err-msg");
+            const saveBtn = mkBtn("btn-primary", "Connect & Save", saveAndReboot);
+            saveBtn.style.cssText = "width:100%;justify-content:center;margin-top:4px;";
+            s4body.appendChild(fUrl); s4body.appendChild(fKey); s4body.appendChild(errEl); s4body.appendChild(saveBtn);
+            const s4 = makeStep("4", "Enter your Supabase keys", null, s4body);
+
+            const sep = div(); sep.style.cssText = "height:1px;background:var(--border);margin:16px 0;";
+            [title, sub, s1, s2, s3, sep, s4].forEach(n => box.appendChild(n));
+            overlay.appendChild(box);
+            return overlay;
+
+            function makeStep(num, title, htmlDesc, extra) {
+                const wrap = div(); wrap.style.marginBottom = "18px";
+                const hdr = div(); hdr.style.cssText = "display:flex;align-items:center;margin-bottom:6px;";
+                const n = span("step-num"); n.textContent = num;
+                const t = span(); t.style.cssText = "font-size:13px;font-weight:600;"; t.textContent = title;
+                hdr.appendChild(n); hdr.appendChild(t);
+                wrap.appendChild(hdr);
+                if (htmlDesc) { const d = div(); d.style.cssText = "font-size:12px;color:var(--text-2);margin-left:30px;line-height:1.7;"; d.innerHTML = htmlDesc; wrap.appendChild(d); }
+                if (extra) wrap.appendChild(extra);
+                return wrap;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // AUTH VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function AuthView() {
+            let emailVal = "", passVal = "", loading = false;
+            const card = div("auth-card fade-up");
+
+            const logoRow = div(); logoRow.style.cssText = "display:flex;align-items:center;gap:12px;margin-bottom:28px;";
+            const lm = div("logo-mark"); lm.textContent = "N";
+            const lt = div();
+            const ln = div(); ln.style.cssText = "font-size:18px;font-weight:700;"; ln.textContent = "NexaFlow";
+            const ls = div(); ls.style.cssText = "font-size:11px;color:var(--text-2);"; ls.textContent = "Command Centre";
+            lt.appendChild(ln); lt.appendChild(ls); logoRow.appendChild(lm); logoRow.appendChild(lt);
+
+            const title = div(); title.style.cssText = "font-size:22px;font-weight:700;margin-bottom:6px;"; title.textContent = "Welcome back";
+            const sub = div(); sub.style.cssText = "font-size:14px;color:var(--text-2);margin-bottom:28px;"; sub.textContent = "Sign in to your NexaFlow workspace";
+
+            const fEmail = div("field-grp");
+            const lEmail = el("label", { class: "field-lbl" }); lEmail.textContent = "Email address";
+            const iEmail = el("input", { class: "input", type: "email", placeholder: "you@company.com" });
+            iEmail.addEventListener("input", e => emailVal = e.target.value);
+            iEmail.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+            fEmail.appendChild(lEmail); fEmail.appendChild(iEmail);
+
+            const fPass = div("field-grp");
+            const lPass = el("label", { class: "field-lbl" }); lPass.textContent = "Password";
+            const iPass = el("input", { class: "input", type: "password", placeholder: "••••••••" });
+            iPass.addEventListener("input", e => passVal = e.target.value);
+            iPass.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+            fPass.appendChild(lPass); fPass.appendChild(iPass);
+
+            const err = div("err-msg");
+            const loginBtn = el("button", { class: "btn btn-primary" });
+            loginBtn.style.cssText = "width:100%;margin-top:18px;justify-content:center;font-size:14px;padding:11px;";
+            loginBtn.textContent = "Sign in →";
+
+            async function doLogin() {
+                if (loading) return;
+                err.textContent = "";
+                if (!emailVal || !passVal) { err.textContent = "Please enter email and password."; return; }
+                loading = true; loginBtn.innerHTML = ""; loginBtn.appendChild(div("spinner")); loginBtn.disabled = true;
+                const res = await signIn(emailVal, passVal);
+                if (res.error) {
+                    err.textContent = res.error.message || "Login failed.";
+                    loginBtn.textContent = "Sign in →"; loginBtn.disabled = false; loading = false;
+                }
+            }
+            loginBtn.addEventListener("click", doLogin);
+
+            const setupLink = div(); setupLink.style.cssText = "text-align:center;margin-top:18px;font-size:12px;color:var(--text-2);";
+            const sl = el("span"); sl.style.cssText = "color:var(--indigo-hi);cursor:pointer;text-decoration:underline;"; sl.textContent = "Configure database connection";
+            sl.addEventListener("click", () => { APP.showSetup = true; render(); });
+            setupLink.appendChild(sl);
+
+            [logoRow, title, sub, fEmail, fPass, err, loginBtn, setupLink].forEach(n => card.appendChild(n));
+            setTimeout(() => iEmail.focus(), 80);
+            return div("auth-wrap", card);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SIDEBAR
+        // ═══════════════════════════════════════════════════════════════
+        function SidebarView() {
+            const NAV = [
+                { id: "dashboard", icon: "◈", label: "Dashboard" },
+                { id: "analytics", icon: "◉", label: "Analytics" },
+                { id: "history", icon: "◎", label: "History" },
+                { id: "team", icon: "◐", label: "Team" },
+                { id: "settings", icon: "⊙", label: "Settings" },
+            ];
+            const sb = div(`sidebar${APP.collapsed ? " collapsed" : ""}`);
+            const logo = div("sb-logo");
+            const lm = div("logo-mark"); lm.textContent = "N";
+            const lt = div("logo-text");
+            const ln = div("logo-name"); ln.textContent = "NexaFlow";
+            const ls = div("logo-sub"); ls.textContent = "Command Centre";
+            lt.appendChild(ln); lt.appendChild(ls);
+            logo.appendChild(lm); logo.appendChild(lt);
+
+            const nav = div("sb-nav");
+            NAV.forEach(n => {
+                const item = el("button", { class: `nav-item${APP.page === n.id ? " active" : ""}` });
+                item.addEventListener("click", () => { APP.page = n.id; render(); });
+                const icon = span("nav-icon"); icon.textContent = n.icon;
+                const lbl = span("nav-lbl"); lbl.textContent = n.label;
+                item.appendChild(icon); item.appendChild(lbl);
+                nav.appendChild(item);
+            });
+
+            const bottom = div("sb-bottom");
+            const signout = el("button", { class: "nav-item" });
+            signout.addEventListener("click", signOut);
+            const soI = span("nav-icon"); soI.textContent = "↩";
+            const soL = span("nav-lbl"); soL.textContent = "Sign Out";
+            signout.appendChild(soI); signout.appendChild(soL);
+
+            const chip = div("user-chip");
+            chip.appendChild(Avatar(APP.profile?.avatar_initials || "?", "sm"));
+            const ui = div("user-info");
+            const un = div("user-name"); un.textContent = APP.profile?.full_name || "User";
+            const ur = div("user-role-lbl"); ur.textContent = APP.profile?.role || "";
+            ui.appendChild(un); ui.appendChild(ur);
+            chip.appendChild(ui);
+
+            bottom.appendChild(signout); bottom.appendChild(chip);
+            sb.appendChild(logo); sb.appendChild(nav); sb.appendChild(bottom);
+            return sb;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TOPBAR
+        // ═══════════════════════════════════════════════════════════════
+        function TopbarView() {
+            const titles = { dashboard: "Dashboard", analytics: "Analytics", history: "History", team: "Team", settings: "Settings" };
+            const cfg = STATUS_CFG[APP.status] || STATUS_CFG["checked-out"];
+            const bar = div("topbar");
+
+            const menuBtn = div("icon-btn"); menuBtn.textContent = "☰";
+            menuBtn.addEventListener("click", () => { APP.collapsed = !APP.collapsed; render(); });
+
+            const titleBlock = div(); titleBlock.style.flex = "1";
+            const titleEl = div("tb-title"); titleEl.textContent = titles[APP.page] || "Dashboard";
+            const subEl = div("tb-sub"); subEl.textContent = nowFull();
+            titleBlock.appendChild(titleEl); titleBlock.appendChild(subEl);
+
+            const sbadge = div("badge");
+            sbadge.style.background = cfg.bg; sbadge.style.color = cfg.color; sbadge.style.fontSize = "12px";
+            const si = span(); si.textContent = cfg.icon;
+            if (APP.status !== "checked-out") si.classList.add("pulse");
+            sbadge.appendChild(si); sbadge.appendChild(document.createTextNode(" " + cfg.label));
+
+            const clockEl = span(); clockEl.id = "live-clock";
+            clockEl.style.cssText = "font-family:var(--mono);font-size:13px;color:var(--text-2);min-width:44px;";
+            clockEl.textContent = now5();
+
+            const themeBtn = div("icon-btn");
+            themeBtn.textContent = APP.theme === "dark" ? "☀" : "🌙";
+            themeBtn.addEventListener("click", () => {
+                const t = APP.theme === "dark" ? "light" : "dark";
+                document.body.setAttribute("data-theme", t);
+                localStorage.setItem("nf_theme", t);
+                APP.theme = t; render();
+            });
+
+            const setupBtn = div("icon-btn"); setupBtn.textContent = "⚙"; setupBtn.title = "Configure database";
+            setupBtn.addEventListener("click", () => { APP.showSetup = true; render(); });
+
+            if (APP.saving) {
+                const sp = div("spinner"); sp.style.cssText = "width:20px;height:20px;";
+                [menuBtn, titleBlock, sp, themeBtn].forEach(n => bar.appendChild(n));
+            } else {
+                [menuBtn, titleBlock, sbadge, clockEl, themeBtn, setupBtn].forEach(n => bar.appendChild(n));
+            }
+            return bar;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // COMPUTE TOTALS
+        // ═══════════════════════════════════════════════════════════════
+        function computeTotals(sessions) {
+            let work = 0, brk = 0, meet = 0, call = 0, focus = 0;
+            sessions.filter(s => s.ended_at).forEach(s => {
+                const d = s.duration_minutes || 0;
+                if (s.type === "checked-in") work += d;
+                if (s.type === "break") brk += d;
+                if (s.type === "meeting") meet += d;
+                if (s.type === "call") call += d;
+                if (s.type === "focus") focus += d;
+            });
+            const open = sessions.find(s => !s.ended_at);
+            if (open) {
+                const cur = minutesBetween(open.started_at);
+                if (open.type === "checked-in") work += cur;
+                if (open.type === "break") brk += cur;
+                if (open.type === "meeting") meet += cur;
+                if (open.type === "call") call += cur;
+                if (open.type === "focus") focus += cur;
+            }
+            return { work, brk, meet, call, focus, total: work + brk + meet + call + focus };
+        }
+
+        function DonutChart(segments) {
+            const r = 40, cx = 50, cy = 50, sw = 14, circ = 2 * Math.PI * r;
+            const total = segments.reduce((a, s) => a + s.v, 0) || 1;
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.setAttribute("width", "110"); svg.setAttribute("height", "110");
+
+            const bg = document.createElementNS(svgNS, "circle");
+            bg.setAttribute("cx", cx); bg.setAttribute("cy", cy); bg.setAttribute("r", r);
+            bg.setAttribute("fill", "none"); bg.setAttribute("stroke", "var(--border)"); bg.setAttribute("stroke-width", sw);
+            svg.appendChild(bg);
+
+            const inner = document.createElementNS(svgNS, "circle");
+            inner.setAttribute("cx", cx); inner.setAttribute("cy", cy); inner.setAttribute("r", r - sw / 2 - 3);
+            inner.setAttribute("fill", "var(--bg-card2)");
+            svg.appendChild(inner);
+
+            let offset = 0;
+            segments.forEach(s => {
+                if (s.v <= 0) return;
+                const dash = (s.v / total) * circ;
+                const c = document.createElementNS(svgNS, "circle");
+                c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", r);
+                c.setAttribute("fill", "none"); c.setAttribute("stroke", s.color); c.setAttribute("stroke-width", sw);
+                c.setAttribute("stroke-dasharray", `${dash} ${circ - dash}`);
+                c.setAttribute("stroke-dashoffset", `${circ * 0.25 - offset}`);
+                c.setAttribute("stroke-linecap", "round");
+                svg.appendChild(c);
+                offset += dash;
+            });
+            return svg;
+        }
+
+        function StatCard(label, value, sub) {
+            const c = div("card card-sm fade-up");
+            const lbl = div("card-lbl"); lbl.textContent = label;
+            const val = div("card-val"); val.textContent = String(value);
+            c.appendChild(lbl); c.appendChild(val);
+            if (sub) { const s = div("card-sub"); s.textContent = sub; c.appendChild(s); }
+            return c;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DASHBOARD VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function DashboardView() {
+            const { timeline } = APP;
+            const { work, brk, meet, call, focus, total } = computeTotals(timeline);
+            const wrap = div("fade-up");
+
+            const statRow = div("grid4");
+            [StatCard("Active Work", fmt(work), "Productive time today"),
+            StatCard("Break Time", fmt(brk), "Rest taken today"),
+            StatCard("Meetings", fmt(meet), "Time in meetings"),
+            StatCard("Total Logged", fmt(total), "All sessions combined")
+            ].forEach(c => statRow.appendChild(c));
+
+            // Status card
+            const statusCard = div("card");
+            const shdr = div("sec-hdr");
+            const sttl = div("sec-title"); sttl.textContent = "Your Status";
+            shdr.appendChild(sttl); shdr.appendChild(StatusBadge(APP.status));
+            statusCard.appendChild(shdr);
+
+            const saRow = div("sa-row");
+            [
+                { key: "checked-in", label: "Check In", cls: "btn-success", disabled: APP.status !== "checked-out" },
+                { key: "checked-out", label: "Check Out", cls: "btn-danger", disabled: APP.status === "checked-out" },
+                { key: "break", label: "Break", cls: "btn-outline", disabled: APP.status === "checked-out" || APP.status === "break" },
+                { key: "meeting", label: "Meeting", cls: "btn-outline", disabled: APP.status === "checked-out" || APP.status === "meeting" },
+                { key: "call", label: "Call", cls: "btn-outline", disabled: APP.status === "checked-out" || APP.status === "call" },
+                { key: "focus", label: "Focus", cls: "btn-outline", disabled: APP.status === "checked-out" || APP.status === "focus" },
+            ].forEach(a => {
+                saRow.appendChild(mkBtn(a.cls + " btn-sm", a.label, () => changeStatus(a.key), a.disabled || APP.saving));
+            });
+            statusCard.appendChild(saRow);
+            const syncNote = div(); syncNote.style.cssText = "font-size:11px;color:var(--text-2);margin-top:10px;";
+            syncNote.textContent = "✓ All status changes saved to database in real-time";
+            statusCard.appendChild(syncNote);
+
+            // Timeline card
+            const tlCard = div("card");
+            const thdr = div("sec-hdr");
+            const tttl = div("sec-title"); tttl.textContent = "Today's Timeline";
+            const tcount = span(); tcount.style.cssText = "font-size:11px;color:var(--text-2);font-family:var(--mono);"; tcount.textContent = `${timeline.length} sessions`;
+            thdr.appendChild(tttl); thdr.appendChild(tcount);
+            tlCard.appendChild(thdr);
+
+            const tlWrap = div("tl");
+            if (timeline.length === 0) {
+                const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:20px 0;";
+                empty.textContent = "No activity yet today. Click Check In to start.";
+                tlWrap.appendChild(empty);
+            } else {
+                [...timeline].reverse().forEach(t => {
+                    const c = STATUS_CFG[t.type] || STATUS_CFG["checked-in"];
+                    const item = div("tl-item");
+                    const dot = div("tl-dot");
+                    dot.style.borderColor = c.color; dot.style.color = c.color; dot.style.background = c.bg; dot.textContent = c.icon;
+                    const body = div();
+                    const lbl = div(); lbl.style.cssText = "font-size:13px;font-weight:500;"; lbl.textContent = c.label;
+                    const time = div(); time.style.cssText = "font-size:11.5px;color:var(--text-2);font-family:var(--mono);margin-top:2px;";
+                    let ts = fmtTime(t.started_at);
+                    if (t.ended_at) ts += ` → ${fmtTime(t.ended_at)} · ${fmt(t.duration_minutes)}`;
+                    else ts += " → now (live)";
+                    time.textContent = ts;
+                    body.appendChild(lbl); body.appendChild(time);
+                    item.appendChild(dot); item.appendChild(body);
+                    if (!t.ended_at) { const tag = span("tag"); tag.textContent = "live"; tag.style.cssText = "background:var(--indigo-lo);color:var(--indigo-hi);margin-left:auto;"; item.appendChild(tag); }
+                    tlWrap.appendChild(item);
+                });
+            }
+            tlCard.appendChild(tlWrap);
+
+            // Distribution donut
+            const distCard = div("card");
+            const dttl = div("sec-title"); dttl.textContent = "Time Distribution"; distCard.appendChild(dttl);
+            const distData = [
+                { l: "Active Work", color: "#6366f1", v: work },
+                { l: "Breaks", color: "#f59e0b", v: brk },
+                { l: "Meetings", color: "#0ea5e9", v: meet },
+                { l: "Calls", color: "#8b5cf6", v: call },
+                { l: "Focus", color: "#d946ef", v: focus },
+            ].filter(d => d.v > 0);
+            if (distData.length) {
+                const dWrap = div("donut-wrap"); dWrap.appendChild(DonutChart(distData)); distCard.appendChild(dWrap);
+                const dt = distData.reduce((a, d) => a + d.v, 0) || 1;
+                distData.forEach(d => {
+                    const row = div("pie-row");
+                    const dot = span("pie-dot"); dot.style.background = d.color;
+                    const name = span("pie-name"); name.textContent = d.l;
+                    const val = span("pie-val"); val.textContent = `${Math.round(d.v / dt * 100)}%`;
+                    row.appendChild(dot); row.appendChild(name); row.appendChild(val); distCard.appendChild(row);
+                });
+            } else {
+                const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:24px 0;";
+                empty.textContent = "Log time to see breakdown"; distCard.appendChild(empty);
+            }
+
+            // Quick links
+            const qlCard = div("card");
+            const qttl = div("sec-title"); qttl.style.marginBottom = "12px"; qttl.textContent = "Quick Access"; qlCard.appendChild(qttl);
+            QUICK_LINKS.forEach(lk => {
+                const a = el("a", { class: "ql-item", href: lk.href, target: "_blank", rel: "noopener noreferrer" });
+                const icon = div("ql-icon"); icon.textContent = lk.icon; icon.style.background = lk.bg;
+                const info = div();
+                const iN = div(); iN.style.cssText = "font-size:13px;font-weight:500;"; iN.textContent = lk.label;
+                const iS = div(); iS.style.cssText = "font-size:11px;color:var(--text-2);"; iS.textContent = lk.sub;
+                info.appendChild(iN); info.appendChild(iS);
+                const arrow = span(); arrow.style.cssText = "margin-left:auto;color:var(--text-3);font-size:12px;"; arrow.textContent = "↗";
+                a.appendChild(icon); a.appendChild(info); a.appendChild(arrow); qlCard.appendChild(a);
+            });
+
+            const right = div("col-stack");
+            [statusCard, distCard, qlCard].forEach(c => right.appendChild(c));
+            const left = div("col-stack"); left.appendChild(tlCard);
+            const main = div("grid-main"); main.appendChild(left); main.appendChild(right);
+            wrap.appendChild(statRow); wrap.appendChild(main);
+            return wrap;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // ANALYTICS VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function AnalyticsView() {
+            const wrap = div("fade-up");
+            const { work, brk, meet, call, focus, total } = computeTotals(APP.timeline);
+            const prodPct = total > 0 ? Math.round((work / total) * 100) : 0;
+
+            const statRow = div("grid4");
+            [StatCard("Today Total", fmt(total), "All logged time"),
+            StatCard("Active Work", fmt(work), "Productive time"),
+            StatCard("Productivity", `${prodPct}%`, "Active vs total"),
+            StatCard("Sessions", String(APP.timeline.length), "Check-ins today")
+            ].forEach(c => statRow.appendChild(c));
+
+            const breakdownCard = div("card");
+            const bttl = div("sec-title"); bttl.style.marginBottom = "16px"; bttl.textContent = "Today's Breakdown";
+            breakdownCard.appendChild(bttl);
+            const rows = [
+                { label: "Active Work", min: work, color: "#6366f1" },
+                { label: "Breaks", min: brk, color: "#f59e0b" },
+                { label: "Meetings", min: meet, color: "#0ea5e9" },
+                { label: "Calls", min: call, color: "#8b5cf6" },
+                { label: "Focus Mode", min: focus, color: "#d946ef" },
+            ];
+            const maxMin = Math.max(...rows.map(r => r.min), 1);
+            rows.forEach(r => {
+                const row = div(); row.style.cssText = "display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:10px;";
+                const lbl = span(); lbl.style.cssText = "width:90px;color:var(--text-2);flex-shrink:0;"; lbl.textContent = r.label;
+                const pb = div("prog"); pb.style.flex = "1";
+                const pf = div("prog-fill"); pf.style.width = `${(r.min / maxMin) * 100}%`; pf.style.background = r.color;
+                pb.appendChild(pf);
+                const valS = span(); valS.style.cssText = "font-family:var(--mono);color:var(--text-2);width:50px;text-align:right;flex-shrink:0;"; valS.textContent = fmt(r.min);
+                row.appendChild(lbl); row.appendChild(pb); row.appendChild(valS); breakdownCard.appendChild(row);
+            });
+
+            const histCard = div("card");
+            const hHdr = div("sec-hdr");
+            const hTtl = div("sec-title"); hTtl.textContent = "Last 30 Days";
+            const hSub = span(); hSub.style.cssText = "font-size:11px;color:var(--text-2);"; hSub.textContent = "Loading…";
+            hHdr.appendChild(hTtl); hHdr.appendChild(hSub); histCard.appendChild(hHdr);
+            const histBody = div(); histCard.appendChild(histBody);
+
+            (async () => {
+                const from30 = new Date(); from30.setDate(from30.getDate() - 30);
+                const sessions30 = await loadRangeSessions(APP.profile.id, from30.toISOString().slice(0, 10), nowDateStr());
+                const byDate = {};
+                sessions30.forEach(s => {
+                    if (!byDate[s.work_date]) byDate[s.work_date] = { work: 0, brk: 0, sessions: 0 };
+                    const d = s.duration_minutes || 0;
+                    if (s.type === "checked-in") byDate[s.work_date].work += d;
+                    if (s.type === "break") byDate[s.work_date].brk += d;
+                    byDate[s.work_date].sessions++;
+                });
+                const dates = Object.keys(byDate).sort();
+                hSub.textContent = `${dates.length} days with activity`;
+                if (dates.length === 0) {
+                    const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:20px 0;";
+                    empty.textContent = "No data yet. Start tracking to see history here."; histBody.appendChild(empty); return;
+                }
+                let totalWork30 = 0;
+                dates.forEach(d => totalWork30 += byDate[d].work);
+                const avgWork = dates.length ? Math.round(totalWork30 / dates.length) : 0;
+                const sRow = div(); sRow.style.cssText = "display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;";
+                [{ l: "Days Tracked", v: String(dates.length) }, { l: "Total Work", v: fmt(totalWork30) }, { l: "Daily Avg", v: fmt(avgWork) }].forEach(s => {
+                    const c = div(); c.style.cssText = "background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r1);padding:10px 14px;flex:1;min-width:80px;";
+                    const lbl = div(); lbl.style.cssText = "font-size:11px;color:var(--text-2);margin-bottom:4px;"; lbl.textContent = s.l;
+                    const val = div(); val.style.cssText = "font-size:16px;font-weight:600;"; val.textContent = s.v;
+                    c.appendChild(lbl); c.appendChild(val); sRow.appendChild(c);
+                });
+                histBody.appendChild(sRow);
+                const recent = dates.slice(-14).reverse();
+                const table = el("table", { class: "tbl" });
+                const thead = el("thead"); const htr = el("tr");
+                ["Date", "Work Time", "Breaks", "Sessions"].forEach(h => { const th = el("th"); th.textContent = h; htr.appendChild(th); });
+                thead.appendChild(htr);
+                const tbody = el("tbody");
+                recent.forEach(d => {
+                    const row = byDate[d];
+                    const isToday = d === nowDateStr();
+                    const tr = el("tr");
+                    const dLabel = new Date(d + "T12:00:00").toLocaleDateString("en-IN", { weekday: "short", month: "short", day: "numeric" });
+                    const tdD = el("td"); tdD.style.fontWeight = isToday ? "600" : "400";
+                    if (isToday) { const t = span("tag"); t.textContent = "today"; t.style.cssText = "background:var(--indigo-lo);color:var(--indigo-hi);margin-right:6px;"; tdD.appendChild(t); }
+                    tdD.appendChild(document.createTextNode(dLabel));
+                    const tdW = el("td"); tdW.style.cssText = "font-family:var(--mono);font-size:12px;"; tdW.textContent = fmt(row.work);
+                    const tdB = el("td"); tdB.style.cssText = "font-family:var(--mono);font-size:12px;color:var(--text-2);"; tdB.textContent = fmt(row.brk);
+                    const tdS = el("td"); tdS.style.cssText = "font-family:var(--mono);font-size:12px;color:var(--text-2);"; tdS.textContent = String(row.sessions);
+                    tr.appendChild(tdD); tr.appendChild(tdW); tr.appendChild(tdB); tr.appendChild(tdS);
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(thead); table.appendChild(tbody); histBody.appendChild(table);
+            })();
+
+            wrap.appendChild(statRow); wrap.appendChild(breakdownCard);
+            wrap.appendChild(el("div", { style: { height: "16px" } })); wrap.appendChild(histCard);
+            return wrap;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // HISTORY VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function HistoryView() {
+            const wrap = div("fade-up");
+            if (!APP.historyDate) APP.historyDate = nowDateStr();
+
+            const header = div("card"); header.style.marginBottom = "16px";
+            const hHdr = div("sec-hdr");
+            const hTtl = div("sec-title"); hTtl.textContent = "Session History";
+            hHdr.appendChild(hTtl); header.appendChild(hHdr);
+
+            const dateNav = div(); dateNav.style.cssText = "display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;";
+            const prevBtn = mkBtn("btn-outline btn-sm", "‹ Prev", () => {
+                const d = new Date(APP.historyDate + "T12:00:00"); d.setDate(d.getDate() - 1);
+                APP.historyDate = d.toISOString().slice(0, 10); render();
+            });
+            const nextBtn = mkBtn("btn-outline btn-sm", "Next ›", () => {
+                const d = new Date(APP.historyDate + "T12:00:00"); d.setDate(d.getDate() + 1);
+                const nd = d.toISOString().slice(0, 10);
+                if (nd > nowDateStr()) return;
+                APP.historyDate = nd; render();
+            });
+            nextBtn.disabled = APP.historyDate === nowDateStr();
+            const dateLabel = div(); dateLabel.style.cssText = "font-family:var(--mono);font-size:13px;padding:0 8px;";
+            dateLabel.textContent = new Date(APP.historyDate + "T12:00:00").toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+            const todayBtn = mkBtn("btn-outline btn-sm", "Today", () => { APP.historyDate = nowDateStr(); render(); });
+            dateNav.appendChild(prevBtn); dateNav.appendChild(dateLabel); dateNav.appendChild(nextBtn); dateNav.appendChild(todayBtn);
+            header.appendChild(dateNav);
+            wrap.appendChild(header);
+
+            const results = div(); wrap.appendChild(results);
+
+            (async () => {
+                const loading = div(); loading.style.cssText = "display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:13px;padding:20px;";
+                loading.appendChild(div("spinner")); loading.appendChild(document.createTextNode(" Loading…"));
+                results.appendChild(loading);
+
+                const sessions = await loadDateTimeline(APP.historyDate, APP.profile.id);
+                results.innerHTML = "";
+
+                const { work, brk, meet, total } = computeTotals(sessions);
+                const sr = div("grid4"); sr.style.marginBottom = "16px";
+                [StatCard("Work", fmt(work), ""), StatCard("Break", fmt(brk), ""), StatCard("Meetings", fmt(meet), ""), StatCard("Total", fmt(total), "")].forEach(c => sr.appendChild(c));
+                results.appendChild(sr);
+
+                const sessCard = div("card");
+                const sHdr = div("sec-hdr");
+                const sTtl = div("sec-title"); sTtl.textContent = "Sessions";
+                const sCnt = span(); sCnt.style.cssText = "font-size:11px;color:var(--text-2);font-family:var(--mono);"; sCnt.textContent = `${sessions.length} entries`;
+                sHdr.appendChild(sTtl); sHdr.appendChild(sCnt); sessCard.appendChild(sHdr);
+
+                if (sessions.length === 0) {
+                    const empty = div(); empty.style.cssText = "color:var(--text-2);font-size:13px;text-align:center;padding:28px 0;";
+                    empty.textContent = APP.historyDate === nowDateStr() ? "No sessions yet today." : "No sessions on this date.";
+                    sessCard.appendChild(empty);
+                } else {
+                    const table = el("table", { class: "tbl" });
+                    const thead = el("thead"); const htr = el("tr");
+                    ["#", "Status", "Start", "End", "Duration"].forEach(h => { const th = el("th"); th.textContent = h; htr.appendChild(th); });
+                    thead.appendChild(htr);
+                    const tbody = el("tbody");
+                    sessions.forEach((s, i) => {
+                        const c = STATUS_CFG[s.type] || STATUS_CFG["checked-in"];
+                        const tr = el("tr");
+                        const tdi = el("td"); tdi.style.cssText = "font-family:var(--mono);font-size:11px;color:var(--text-3);"; tdi.textContent = String(i + 1);
+                        const tdt = el("td"); const badge = span("tag"); badge.textContent = c.label; badge.style.cssText = `background:${c.bg};color:${c.color};`; tdt.appendChild(badge);
+                        const tds = el("td"); tds.style.cssText = "font-family:var(--mono);font-size:12px;"; tds.textContent = fmtTime(s.started_at);
+                        const tde = el("td"); tde.style.cssText = "font-family:var(--mono);font-size:12px;color:var(--text-2);"; tde.textContent = s.ended_at ? fmtTime(s.ended_at) : "ongoing";
+                        const tdd = el("td"); tdd.style.cssText = "font-family:var(--mono);font-size:12px;"; tdd.textContent = s.duration_minutes != null ? fmt(s.duration_minutes) : "—";
+                        tr.appendChild(tdi); tr.appendChild(tdt); tr.appendChild(tds); tr.appendChild(tde); tr.appendChild(tdd); tbody.appendChild(tr);
+                    });
+                    table.appendChild(thead); table.appendChild(tbody); sessCard.appendChild(table);
+                }
+                results.appendChild(sessCard);
+            })();
+
+            return wrap;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TEAM VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function TeamView() {
+            const wrap = div("fade-up");
+            if (APP.profile?.role !== "Admin") {
+                const card = div("card"); card.style.cssText = "text-align:center;padding:40px;color:var(--text-2);";
+                card.textContent = "🔒 Admin access required to view team data.";
+                wrap.appendChild(card); return wrap;
+            }
+            const loading = div(); loading.style.cssText = "display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:13px;padding:32px;";
+            loading.appendChild(div("spinner")); loading.appendChild(document.createTextNode(" Loading team data…"));
+            wrap.appendChild(loading);
+
+            (async () => {
+                const team = await loadTeamStatus();
+                wrap.innerHTML = "";
+                const activeCount = team.filter(m => ["checked-in", "focus", "call"].includes(m.status)).length;
+                const sessionCount = team.filter(m => ["break", "meeting"].includes(m.status)).length;
+                const awayCount = team.filter(m => m.status === "checked-out").length;
+
+                const sr = div("grid4");
+                [StatCard("Team Members", String(team.length), "Registered users"),
+                StatCard("Working Now", String(activeCount), "Checked in"),
+                StatCard("In Session", String(sessionCount), "Break or meeting"),
+                StatCard("Away", String(awayCount), "Checked out")
+                ].forEach(c => sr.appendChild(c));
+
+                const tableCard = div("card");
+                const tHdr = div("sec-hdr");
+                const tTtl = div("sec-title"); tTtl.textContent = "Live Team Status";
+                const tSub = span(); tSub.style.cssText = "font-size:11px;color:var(--text-2);"; tSub.textContent = "Real-time from database";
+                tHdr.appendChild(tTtl); tHdr.appendChild(tSub); tableCard.appendChild(tHdr);
+
+                const table = el("table", { class: "tbl" });
+                const thead = el("thead"); const htr = el("tr");
+                ["Member", "Role", "Status", "Today's Work", "Sessions"].forEach(h => { const th = el("th"); th.textContent = h; htr.appendChild(th); });
+                thead.appendChild(htr);
+                const tbody = el("tbody");
+                team.forEach(m => {
+                    const tr = el("tr");
+                    const tdN = el("td"); const nameRow = div(); nameRow.style.cssText = "display:flex;align-items:center;gap:9px;";
+                    nameRow.appendChild(Avatar(m.avatar, "sm")); const ns = span(); ns.textContent = m.name; nameRow.appendChild(ns); tdN.appendChild(nameRow);
+                    const tdR = el("td"); const rt = span("tag"); rt.textContent = m.role;
+                    rt.style.cssText = m.role === "Admin" ? "background:var(--indigo-lo);color:var(--indigo-hi);" : "background:rgba(16,185,129,.1);color:#34d399;";
+                    tdR.appendChild(rt);
+                    const tdS = el("td"); tdS.appendChild(StatusBadge(m.status));
+                    const tdW = el("td"); tdW.style.cssText = "font-family:var(--mono);font-size:12px;"; tdW.textContent = fmt(m.workMin);
+                    const tdSe = el("td"); tdSe.style.cssText = "font-family:var(--mono);font-size:12px;color:var(--text-2);"; tdSe.textContent = String(m.sessions);
+                    tr.appendChild(tdN); tr.appendChild(tdR); tr.appendChild(tdS); tr.appendChild(tdW); tr.appendChild(tdSe); tbody.appendChild(tr);
+                });
+                table.appendChild(thead); table.appendChild(tbody); tableCard.appendChild(table);
+
+                const refreshBtn = mkBtn("btn-outline btn-sm", "↺ Refresh", () => { wrap.innerHTML = ""; wrap.appendChild(loading.cloneNode(true)); });
+                refreshBtn.style.marginTop = "14px"; tableCard.appendChild(refreshBtn);
+                wrap.appendChild(sr); wrap.appendChild(tableCard);
+            })();
+            return wrap;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SETTINGS VIEW
+        // ═══════════════════════════════════════════════════════════════
+        function SettingsView() {
+            const u = APP.profile;
+            const wrap = div("fade-up"); wrap.style.maxWidth = "600px";
+
+            const profileCard = div("card"); profileCard.style.marginBottom = "16px";
+            const pttl = div("sec-title"); pttl.style.marginBottom = "16px"; pttl.textContent = "Profile"; profileCard.appendChild(pttl);
+            const pRow = div(); pRow.style.cssText = "display:flex;align-items:center;gap:14px;margin-bottom:18px;";
+            pRow.appendChild(Avatar(u?.avatar_initials || "?", "md"));
+            const pInfo = div();
+            const pN = div(); pN.style.cssText = "font-weight:600;font-size:15px;"; pN.textContent = u?.full_name || "";
+            const pE = div(); pE.style.cssText = "font-size:12.5px;color:var(--text-2);"; pE.textContent = APP.authUser?.email || "";
+            const pR = span("tag"); pR.textContent = u?.role || "Staff"; pR.style.cssText = "margin-top:5px;background:var(--indigo-lo);color:var(--indigo-hi);display:inline-flex;";
+            pInfo.appendChild(pN); pInfo.appendChild(pE); pInfo.appendChild(pR);
+            pRow.appendChild(pInfo); profileCard.appendChild(pRow);
+
+            const fName = div("field-grp");
+            const lName = el("label", { class: "field-lbl" }); lName.textContent = "Display Name";
+            const iName = el("input", { class: "input", value: u?.full_name || "" });
+            fName.appendChild(lName); fName.appendChild(iName);
+
+            const saved = span("saved-pill"); saved.textContent = "✓ Saved"; saved.style.marginLeft = "8px";
+            const saveBtnRow = div(); saveBtnRow.style.cssText = "display:flex;align-items:center;";
+            const saveBtn = mkBtn("btn-primary btn-sm", "Save Changes", async () => {
+                const newName = iName.value.trim();
+                if (!newName || !supabase) return;
+                const initials = newName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+                await supabase.from("profiles").update({ full_name: newName, avatar_initials: initials }).eq("id", APP.profile.id);
+                APP.profile.full_name = newName; APP.profile.avatar_initials = initials;
+                saved.classList.add("show"); setTimeout(() => saved.classList.remove("show"), 2500);
+            });
+            saveBtnRow.appendChild(saveBtn); saveBtnRow.appendChild(saved);
+            profileCard.appendChild(fName); profileCard.appendChild(saveBtnRow);
+
+            const themeCard = div("card"); themeCard.style.marginBottom = "16px";
+            const tttl = div("sec-title"); tttl.style.marginBottom = "14px"; tttl.textContent = "Appearance"; themeCard.appendChild(tttl);
+            const themeRow = div(); themeRow.style.cssText = "display:flex;gap:9px;";
+            ["dark", "light"].forEach(t => {
+                const b = mkBtn(`btn-sm ${APP.theme === t ? "btn-primary" : "btn-outline"}`, t === "dark" ? "🌙 Dark" : "☀️ Light", () => {
+                    document.body.setAttribute("data-theme", t); localStorage.setItem("nf_theme", t); APP.theme = t; render();
+                });
+                themeRow.appendChild(b);
+            });
+            themeCard.appendChild(themeRow);
+
+            const dbCard = div("card"); dbCard.style.marginBottom = "16px";
+            const dbTtl = div("sec-title"); dbTtl.style.marginBottom = "8px"; dbTtl.textContent = "Database Connection";
+            const dbSub = div(); dbSub.style.cssText = "font-size:12.5px;color:var(--text-2);margin-bottom:12px;";
+            dbSub.textContent = "Supabase project connected. Change keys if needed.";
+            const dbBtn = mkBtn("btn-outline btn-sm", "⚙ Reconfigure Database", () => { APP.showSetup = true; render(); });
+            dbCard.appendChild(dbTtl); dbCard.appendChild(dbSub); dbCard.appendChild(dbBtn);
+
+            const resetCard = div("card"); resetCard.style.marginBottom = "16px";
+            const rttl = div("sec-title"); rttl.style.marginBottom = "8px"; rttl.textContent = "Session Management";
+            const rsub = div(); rsub.style.cssText = "font-size:12.5px;color:var(--text-2);margin-bottom:14px;";
+            rsub.textContent = "Manually check out and clear today's open session.";
+            const resetBtn = mkBtn("btn-danger btn-sm", "Force Check Out", async () => {
+                if (!confirm("This will end your current session and check you out. Continue?")) return;
+                await changeStatus("checked-out");
+            });
+            resetCard.appendChild(rttl); resetCard.appendChild(rsub); resetCard.appendChild(resetBtn);
+
+            const infoCard = div("card");
+            const ittl = div("sec-title"); ittl.style.marginBottom = "12px"; ittl.textContent = "Workspace Info"; infoCard.appendChild(ittl);
+            [["Version", "2.0.1 (fixed)"], ["Your Role", u?.role || "—"], ["User ID", APP.authUser?.id?.slice(0, 8) + "…" || "—"], ["DB Status", supabase ? "✓ Connected" : "✗ Not configured"]].forEach(([k, v]) => {
+                const row = div(); row.style.cssText = "display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;";
+                const kEl = span(); kEl.style.color = "var(--text-2)"; kEl.textContent = k;
+                const vEl = span(); vEl.style.cssText = "font-family:var(--mono);font-size:12px;"; vEl.textContent = v;
+                row.appendChild(kEl); row.appendChild(vEl); infoCard.appendChild(row);
+            });
+
+            [profileCard, themeCard, dbCard, resetCard, infoCard].forEach(c => wrap.appendChild(c));
+            return wrap;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RENDER — FIX: no guard on APP.ready blocking setup modal
+        // ═══════════════════════════════════════════════════════════════
+        function render() {
+            document.body.setAttribute("data-theme", APP.theme);
+            const root = document.getElementById("app");
+            root.innerHTML = "";
+
+            // Always show setup modal if requested (even before auth)
+            if (APP.showSetup) {
+                const canClose = !!APP.authUser; // can only close if logged in
+                root.appendChild(SetupModal(canClose));
+                return;
+            }
+
+            // Not ready yet (booting) — show spinner
+            if (!APP.ready) {
+                const ls = div("loading-screen");
+                ls.appendChild(div("spinner"));
+                const t = div(); t.style.cssText = "color:var(--text-2);font-size:13px;"; t.textContent = "Connecting…";
+                ls.appendChild(t); root.appendChild(ls); return;
+            }
+
+            // No auth user → show login
+            if (!APP.authUser || !APP.profile) {
+                root.appendChild(AuthView()); return;
+            }
+
+            // Main app
+            const views = { dashboard: DashboardView, analytics: AnalyticsView, history: HistoryView, team: TeamView, settings: SettingsView };
+            const View = views[APP.page] || DashboardView;
+            const appEl = div("app");
+            appEl.appendChild(SidebarView());
+            const mainEl = div("main");
+            mainEl.appendChild(TopbarView());
+            const content = div("content");
+            content.appendChild(View());
+            mainEl.appendChild(content);
+            appEl.appendChild(mainEl);
+            root.appendChild(appEl);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // LIVE CLOCK — lightweight, no full re-render
+        // ═══════════════════════════════════════════════════════════════
+        setInterval(() => {
+            const clk = document.getElementById("live-clock");
+            if (clk) clk.textContent = now5();
+        }, 30000);
+
+        // ═══════════════════════════════════════════════════════════════
+        // RESPONSIVE
+        // ═══════════════════════════════════════════════════════════════
+        window.addEventListener("resize", () => {
+            if (window.innerWidth < 960 && !APP.collapsed) { APP.collapsed = true; render(); }
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // START
+        // ═══════════════════════════════════════════════════════════════
+        boot();
+    </script>
 </body>
+
 </html>
