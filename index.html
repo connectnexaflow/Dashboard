@@ -2019,8 +2019,10 @@ async function saveContact() {
   const name = document.getElementById('contact-name').value.trim();
   if (!name) { toast('Name required'); return; }
 
-  const contact = {
-    id: uid(),
+  const { supaUrl, supaKey } = state.settings;
+  
+  // Payload for Supabase (without custom id - let Supabase generate it)
+  const contactPayload = {
     name,
     phone: document.getElementById('contact-phone').value.trim(),
     city: document.getElementById('contact-city').value.trim(),
@@ -2030,38 +2032,58 @@ async function saveContact() {
     user_email: state.user?.email || ''
   };
 
-  // Save to Supabase
-  const { supaUrl, supaKey } = state.settings;
-  if (supaKey) {
+  let supabaseId = null;
+  
+  // Save to Supabase first
+  if (supaKey && supaUrl) {
     try {
-      await fetch(`${supaUrl}/rest/v1/contacts`, {
+      const response = await fetch(`${supaUrl}/rest/v1/contacts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'apikey': supaKey,
           'Authorization': 'Bearer ' + supaKey,
-          'Prefer': 'return=minimal'
+          'Prefer': 'return=representation'  // Get inserted row back with generated ID
         },
-        body: JSON.stringify(contact)
+        body: JSON.stringify(contactPayload)
       });
-    } catch(e) { console.error('Contact save error:', e); }
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Supabase contact save error:', response.status, errorData);
+        toast('Supabase error: ' + (errorData.message || response.statusText));
+        // Continue to save locally as fallback
+      } else {
+        const result = await response.json();
+        supabaseId = result[0]?.id;  // Capture Supabase-generated ID
+        console.log('✅ Contact saved to Supabase with ID:', supabaseId);
+      }
+    } catch(e) {
+      console.error('❌ Contact save network error:', e);
+      toast('Network error - saved locally only');
+      // Continue to save locally as fallback
+    }
   }
 
+  // Save locally with Supabase ID if available, otherwise fallback to local UID
+  const localId = supabaseId || uid();
+  
   state.contacts.push({
-    id: contact.id,
-    name: contact.name,
-    phone: contact.phone,
-    city: contact.city,
-    wapp: contact.wapp,
-    note: contact.note,
-    createdAt: contact.created_at,
-    userEmail: contact.user_email
+    id: localId,
+    name: contactPayload.name,
+    phone: contactPayload.phone,
+    city: contactPayload.city,
+    wapp: contactPayload.wapp,
+    note: contactPayload.note,
+    createdAt: contactPayload.created_at,
+    userEmail: contactPayload.user_email
   });
+  
   save();
   closeModal('modal-contact');
   renderContacts();
   toast('Contact saved');
-}
+          }
 
 function renderContacts() {
   const grid = document.getElementById('contacts-grid');
